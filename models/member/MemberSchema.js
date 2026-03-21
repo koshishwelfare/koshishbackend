@@ -8,34 +8,84 @@ const MemberSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
+    lowercase: true,
+    trim: true
+  },
+  username: {
+    type: String,
+    trim: true,
+    lowercase: true,
+    sparse: true,
+    unique: true
+  },
+  password: {
+    type: String,
+    default: ''
   },
   linkedin: {
     type: String,
-    required: true,
+    default: '',
+  },
+  linkedinUrl: {
+    type: String,
+    default: ''
+  },
+  instagramUrl: {
+    type: String,
+    default: ''
+  },
+  facebookUrl: {
+    type: String,
+    default: ''
+  },
+  youtubeUrl: {
+    type: String,
+    default: ''
+  },
+  websiteUrl: {
+    type: String,
+    default: ''
   },
   image:{
     type:String,
     default:defaultImg
   },
+  profileImage: {
+    type: String,
+    default: ''
+  },
+  phoneNumber: {
+    type: String,
+    default: ''
+  },
+  bio: {
+    type: String,
+    default: ''
+  },
   subject: {
     type: String,
-    required: true
+    default: ''
   },
   classTeacher: {
-     type: String,
-     required: true,
+    type: String,
+    default: ''
+  },
+  sessionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'AcademicSession',
+    default: null
   },
   joinTime:{
     type: Date,
-    default:Date.now ()
+    default: Date.now
   },
   leaveTime:{
     type: Date,
-    default:new Date(1552261496289)
+    default: null
   },
   speciality:{
     type:String,
-    required:true,
+    default: '',
 
   },
   isVisionary:{
@@ -54,17 +104,23 @@ const MemberSchema = new mongoose.Schema({
     type:Number,
     default:1
   },
+  role: {
+    type: String,
+    enum: ['mentor', 'sponsor', 'alumni', 'collaborator'],
+    default: 'mentor',
+    required: true
+  },
   isTop:{
     type: Boolean ,
     default:false
   },
   quote:{
       type:String,
-      require:true
+      default: ''
   }, 
   aboutHead:{
       type: String,
-      require: true
+      default: ''
   },
   yog:{
       type: Number,
@@ -74,8 +130,7 @@ const MemberSchema = new mongoose.Schema({
     type: String,
     default:"I love Koshish"
   }
-
-});
-const MemberModel = mongoose.model('TeacherModel', MemberSchema);
+}, { timestamps: true });
+const MemberModel = mongoose.models.TeacherModel || mongoose.model('TeacherModel', MemberSchema);
 
 export default  MemberModel;

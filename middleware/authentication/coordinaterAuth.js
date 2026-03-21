@@ -1,25 +1,27 @@
-import jwt from 'jsonwebtoken'
+import { verifyAuthToken } from '../../utils/authToken.js';
 //  admin authentication middlewre
 const authCoodinater = async (req,res,next)=>{
-    //    console.log("i am authCoordinator token : ", req.body)
       try{
-            const {authcooditoken} = req.headers;
-            // console.log("req.headers : ",req.headers);
-            // console.log("authCoordinatertoken",authcooditoken)
-            if(!authcooditoken){
-                return res.json({sucess:false,authcooditoken:`${authcooditoken}`, message:"Web token is Null or undefined"})
+            const tokenFromBearer = req.headers.authorization?.startsWith('Bearer ')
+              ? req.headers.authorization.split(' ')[1]
+              : null;
+            const {authcooditoken, authcoordinatertoken} = req.headers;
+            const cookieToken = req.cookies?.coordinatorToken;
+            const token = tokenFromBearer || authcooditoken || authcoordinatertoken || cookieToken;
+            if(!token){
+                return res.status(401).json({success:false, message:'Not authorized. Please login again'})
             }
-            const tokenDecode= jwt.verify(authcooditoken, process.env.JWT_SECKRET)
-            // console.log("tokenDecode",tokenDecode);
-            if( tokenDecode !== process.env.COORDINATOR_USERNAME + process.env.COORDINATER_PASSWORD ){
-                return res.json({sucess:false, message:"Not Authorized Login again"})
+            const tokenDecode = verifyAuthToken(token)
+            if (tokenDecode?.role !== 'coordinator') {
+                return res.status(401).json({success:false, message:'Not authorized. Please login again'})
             }
-            // return res.json({success: true, message:"you are login" })
+            req.coordinator = tokenDecode;
+            req.authRole = tokenDecode.role;
             next();
       }
       catch(error){
          console.log(error);
-         res.json({sucess: false, message: error.message})
+         return res.status(401).json({success: false, message: 'Session expired. Please login again'})
       }
 }
 export default authCoodinater;

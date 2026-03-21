@@ -1,12 +1,15 @@
 import jwt from 'jsonwebtoken'
+import { getJwtSecret } from '../../config/jwtSecret.js';
+import { setAuthCookie } from '../../config/authCookies.js';
 import MemberModel from '../../models/member/MemberSchema.js';
 const loginMember = async (req,res)=>{
     try {
      const {username, password} =  req.body;
      const {email, passkey} = MemberModel.findOne({email:username})
      if(username === email && password === passkey ){
-           const token = jwt.sign (username+password,process.env.JWT_SECKRET) 
+           const token = jwt.sign (username+password, getJwtSecret()) 
 
+           setAuthCookie(res, 'memberToken', token)
            res.json({success:true,cocirculertoken:`${token}`, message:"You are login"});
      }
 else {

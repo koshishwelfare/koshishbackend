@@ -34,7 +34,7 @@ const AddGallery = async(req, res)=>{
             })
         }
         // console.log ("gallery img : ", galleryImg)
-        const saveData = {Photo:galleryImg,date : Date.now() ,thumbnail: imgArryURL.at(-1) , galleryTitle,galleryDescription,youtube,linkedin, googlePhoto,instagram,facebook}
+        const saveData = {Photo:galleryImg, thumbnail: imgArryURL.at(-1) , galleryTitle,galleryDescription,youtube,linkedin, googlePhoto,instagram,facebook}
         // console.log(saveData);
         const newGallery = await GalleryModel.create(saveData);
          await newGallery.save()

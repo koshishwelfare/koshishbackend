@@ -1,6 +1,6 @@
 
 import MemberModel from "../../models/member/MemberSchema.js";
-const getmyMentor =async (req,res) => {
+const getMyMember =async (req,res) => {
   try {
     const {id} = req.body
     // console.log("myid: ", id)
@@ -11,7 +11,7 @@ const getmyMentor =async (req,res) => {
     const {name,linkedin,image,speciality,yog,type,isCertify,isActive,quote,aboutHead,about, classTeacher,subject,leaveTime,joinTime,}=data;
     const sendData = {name,linkedin,yog,image,type,isCertify, isActive,speciality,quote, aboutHead,about, classTeacher,subject,leaveTime,joinTime,}
     // console.log("---> ",  data)
-    res.json({success:true, data: sendData, message: `Mentor fond id: ${id}`});
+    res.json({success:true, data: sendData, message: `Member found by id: ${id}`});
 
   } catch (error) {
     //  console.log(error)
@@ -19,4 +19,4 @@ const getmyMentor =async (req,res) => {
   }
 }
 
-export default getmyMentor
+export default getMyMember

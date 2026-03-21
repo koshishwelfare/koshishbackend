@@ -2,9 +2,8 @@
 import MemberModel from "../../models/member/MemberSchema.js";
 
 const addMentorDB = async(mentorData)=>{
-   console.log(mentorData)
    const newMentor =  await  MemberModel.create(mentorData);
-    await newMentor.save()
+   return newMentor;
 }
 const CertifyMentorDB = async(id)=>{
    // console.log("certify", id);
@@ -20,9 +19,9 @@ const topMentorDB = async(id)=>{
 
     await MemberModel.findByIdAndUpdate(id, {isTop: !isTop})
 }
-const AllMentorDB = async ()=>{
+const AllMentorDB = async (filter = {})=>{
    try {
-      const data = await MemberModel.find({});
+      const data = await MemberModel.find(filter);
       console.log(data);
       return data.reverse()
    } catch (error) {

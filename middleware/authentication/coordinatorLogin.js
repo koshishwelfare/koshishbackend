@@ -1,24 +1,46 @@
-import jwt from 'jsonwebtoken'
-const loginCoordinater = async (req,res)=>{
-    // console.log(req);
-    try {
-     const {username, password} =  req.body;
-     console.log("req.body : ",req.body);
-    //  console.log("email and password : ",username, password);
-    //  console.log("email and password : ",process.env.COORDINATOR_USERNAME, process.env.COORDINATER_PASSWORD );
-     if(username=== process.env.COORDINATOR_USERNAME && password === process.env.COORDINATER_PASSWORD ){
-           const token = jwt.sign (username+password,process.env.JWT_SECKRET) 
+import config from '../../config.js';
+import { setAuthCookie } from '../../config/authCookies.js';
+import { createRoleToken } from '../../utils/authToken.js';
+import { sendAuthNotificationEmail } from '../../utils/mailer.js';
 
-           res.json({success:true,cocirculertoken:`${token}`, message:"You are login"});
-     }
-else {
-        // console.log("Invalid cridencial")
-       res.json({success:false,message:"Invalid cridencial" })
-}
-       
-    } catch (error) {
-    //    console.log(error)
-       res.json({success:false, msg:`admin login ${error.message}`})
+const loginCoordinater = async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const normalizedUsername = String(username || '').trim().toLowerCase();
+    const expectedUsername = String(config.auth.coordinator.username || '').trim().toLowerCase();
+
+    const usernameMatch = normalizedUsername === expectedUsername;
+    const passwordMatch = String(password || '') === String(config.auth.coordinator.password || '');
+
+    if (usernameMatch && passwordMatch) {
+      const token = createRoleToken({ role: 'coordinator', username: normalizedUsername });
+
+      setAuthCookie(res, 'coordinatorToken', token);
+      
+      await sendAuthNotificationEmail({
+        to: config.auth.coordinator.notifyEmail,
+        role: 'coordinator',
+        eventType: 'login',
+        actor: normalizedUsername,
+        timestamp: new Date().toISOString(),
+        ipAddress: req.ip
+      });
+
+      return res.json({
+        success: true,
+        token,
+        coordinatorToken: token,
+        role: 'coordinator',
+        cocirculertoken: token,
+        message: 'Coordinator login successful'
+      });
+    } else {
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
-}
-export default loginCoordinater
+  } catch (error) {
+    console.error('Coordinator login error:', error);
+    return res.status(500).json({ success: false, message: 'Coordinator login failed' });
+  }
+};
+
+export default loginCoordinater;

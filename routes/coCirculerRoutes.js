@@ -10,18 +10,34 @@ import getcontact from '../controller/cocirculer/getcontact.js';
 import upload from '../middleware/cloudimage/multer.js'
 import {CreateAnnouncement,UpdateAnnouncement,hideAnnouncement,getNewsAll,getNewsById } from '../controller/cocirculer/announcement.js';
 import {UpdateGallery,DeleteGallery ,AddGallery,getAllGallery,getGalleryById} from '../controller/cocirculer/gallery.js'
+import {
+	addAcademicSession,
+	getAcademicSessions,
+	getAcademicSessionById,
+	updateAcademicSession,
+	getMentorsForClass,
+	createClass,
+	getClasses,
+	getClassById,
+	updateClass
+} from '../controller/cocirculer/academicController.js';
+import { getOwnProfile, updateOwnProfile } from '../controller/cocirculer/profileManagementController.js';
+import getCocirculerDashboard from '../controller/cocirculer/dashboard.js';
+import { logoutCocirculer } from '../controller/auth/logoutController.js';
+import { getTeacherAttendanceByDailyToken, getTeacherAttendanceDailyQr } from '../controller/cocirculer/teacherAttendanceQrController.js';
 const coCirculerRoutes = express.Router();
 coCirculerRoutes.post('/login', loginCociculer);
+coCirculerRoutes.post('/logout', logoutCocirculer);
 
 // coCirculerRoutes.get('/auth', authCociculer);
 coCirculerRoutes.patch('/update/cocirculer-profile', authCociculer, updatecocerculerprofile);
-// Mentor
-coCirculerRoutes.post('/mentor/add', authCociculer,upload.single('image'),addMentor )
-coCirculerRoutes.get('/mentor/u/:id', authCociculer,getMentorById )
-coCirculerRoutes.patch('/mentor/update/:id', authCociculer,upload.single('image'),updateMentorById )
-coCirculerRoutes.patch('/mentor/terminate/:id', authCociculer,terminateMentor )
-coCirculerRoutes.patch('/mentor/top/:id', authCociculer,TopMentor )
-coCirculerRoutes.get('/mentor/all', authCociculer, AllMentor)
+// Member
+coCirculerRoutes.post('/member/add', authCociculer,upload.single('image'),addMentor )
+coCirculerRoutes.get('/member/u/:id', authCociculer,getMentorById )
+coCirculerRoutes.patch('/member/update/:id', authCociculer,upload.single('image'),updateMentorById )
+coCirculerRoutes.patch('/member/terminate/:id', authCociculer,terminateMentor )
+coCirculerRoutes.patch('/member/top/:id', authCociculer,TopMentor )
+coCirculerRoutes.get('/member/all', authCociculer, AllMentor)
 coCirculerRoutes.get('/member/certificate/:id', authCociculer, AllMentor)
 
 
@@ -59,4 +75,23 @@ coCirculerRoutes.post('/gallery/add',authCociculer,upload.any(), AddGallery);
 coCirculerRoutes.get('/gallery/:id',authCociculer, getGalleryById);
 coCirculerRoutes.patch('/gallery/update/:id',authCociculer,upload.any(), UpdateGallery);
 coCirculerRoutes.delete('/gallery/delete/:id',authCociculer, DeleteGallery);
+
+// Academic management
+coCirculerRoutes.get('/dashboard', authCociculer, getCocirculerDashboard);
+coCirculerRoutes.get('/attendance/teacher-qr', authCociculer, getTeacherAttendanceDailyQr);
+coCirculerRoutes.get('/attendance/teacher-daily', authCociculer, getTeacherAttendanceByDailyToken);
+coCirculerRoutes.post('/academic/session/add', authCociculer, addAcademicSession);
+coCirculerRoutes.get('/academic/sessions', authCociculer, getAcademicSessions);
+coCirculerRoutes.get('/academic/session/:id', authCociculer, getAcademicSessionById);
+coCirculerRoutes.patch('/academic/session/update/:id', authCociculer, updateAcademicSession);
+coCirculerRoutes.get('/academic/mentors', authCociculer, getMentorsForClass);
+coCirculerRoutes.post('/academic/class/add', authCociculer, createClass);
+coCirculerRoutes.get('/academic/classes', authCociculer, getClasses);
+coCirculerRoutes.get('/academic/class/:id', authCociculer, getClassById);
+coCirculerRoutes.patch('/academic/class/update/:id', authCociculer, updateClass);
+
+// Profile management
+coCirculerRoutes.get('/profile-management', authCociculer, getOwnProfile);
+coCirculerRoutes.patch('/profile-management', authCociculer, upload.single('image'), updateOwnProfile);
+
 export default coCirculerRoutes

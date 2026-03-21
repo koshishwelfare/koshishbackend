@@ -32,8 +32,8 @@ const CoordinatorSchema = new mongoose.Schema(
       required: true,
     },
     date: {
-      type: Number,
-      required: true,
+      type: Date,
+      default: Date.now
     },
     
   },

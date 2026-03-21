@@ -42,7 +42,6 @@ const updatecocerculerprofile = async(req,res) => {
         speciality,
         about,
         address: address,
-        date: Date.now(),
       };
       console.log(cocircularData)
     //   const newCocirculer = new CocicularModel(cocircularData);

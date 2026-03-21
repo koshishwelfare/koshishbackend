@@ -33,8 +33,8 @@ const CocicularSchema = new mongoose.Schema(
       required: true,
     },
     date: {
-      type: Number,
-      required: true,
+      type: Date,
+      default: Date.now
     },
     isactive :{
       type: Boolean,
