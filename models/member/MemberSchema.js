@@ -66,7 +66,7 @@ const MemberSchema = new mongoose.Schema({
   classTeacher: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Class',
-    default: ''
+    default: null
   },
   sessionId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -121,6 +121,14 @@ const MemberSchema = new mongoose.Schema({
     default:"I love Koshish"
   }
 }, { timestamps: true });
+
+MemberSchema.pre('validate', function normalizeClassTeacher(next) {
+  if (this.classTeacher === '') {
+    this.classTeacher = null;
+  }
+  next();
+});
+
 const MemberModel = mongoose.models.TeacherModel || mongoose.model('TeacherModel', MemberSchema);
 
 export default  MemberModel;

@@ -86,6 +86,11 @@ const updateTeacherProfile = async (req, res) => {
       updateData.image = updateData.profileImage;
     }
 
+    if (updateData.classTeacher !== undefined) {
+      const normalizedClassTeacher = String(updateData.classTeacher || '').trim();
+      updateData.classTeacher = normalizedClassTeacher ? normalizedClassTeacher : null;
+    }
+
     if (req.file) {
       const imageUpload = await cloudinaryUploadImage(req.file);
       if (imageUpload?.secure_url) {
