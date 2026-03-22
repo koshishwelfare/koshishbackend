@@ -1,4 +1,18 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load env from backend root regardless of current working directory.
+dotenv.config({ path: path.resolve(__dirname, '.env') });
+
+const smtpHost = String(process.env.SMTP_HOST || '').trim();
+const smtpPort = parseInt(process.env.SMTP_PORT, 10) || 587;
+const smtpUser = String(process.env.SMTP_USER || '').trim();
+const smtpPass = String(process.env.SMTP_PASS || '').trim();
+const smtpFrom = String(process.env.SMTP_FROM || process.env.SMTP_USER || '').trim();
 
 const config = {
   // Server Configuration
@@ -29,18 +43,13 @@ const config = {
   // SMTP/Email Configuration
   email: {
     smtp: {
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.SMTP_PORT) || 587,
-      user: process.env.SMTP_USER || '',
-      pass: process.env.SMTP_PASS || '',
-      from: process.env.SMTP_FROM || process.env.SMTP_USER || '',
+      host: smtpHost || 'smtp.gmail.com',
+      port: smtpPort,
+      user: smtpUser,
+      pass: smtpPass,
+      from: smtpFrom,
     },
-    isConfigured: Boolean(
-      process.env.SMTP_HOST &&
-        process.env.SMTP_PORT &&
-        process.env.SMTP_USER &&
-        process.env.SMTP_PASS
-    ),
+    isConfigured: Boolean(smtpHost && smtpPort && smtpUser && smtpPass),
   },
 
   // Authentication Credentials

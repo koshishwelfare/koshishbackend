@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import validator from 'validator';
 import CocicularModel from '../../models/Cocirculer/cocerculerProfile.js';
+import { sendCredentialTemplateEmail } from '../../utils/mailer.js';
 
 /**
  * Onboard a new Co-Curricular user
@@ -62,6 +63,14 @@ const onboardCocircular = async (req, res) => {
       isactive: true
     });
 
+    const mailResult = await sendCredentialTemplateEmail({
+      to: cocircular.email,
+      name: cocircular.name,
+      username: cocircular.email,
+      password,
+      label: 'Co-Curricular Onboarding Credentials'
+    });
+
     return res.json({
       success: true,
       message: 'Co-Curricular user onboarded successfully',
@@ -73,7 +82,17 @@ const onboardCocircular = async (req, res) => {
         degree: cocircular.degree,
         isactive: cocircular.isactive,
         createdAt: cocircular.date
-      }
+      },
+      email: {
+        sent: mailResult.sent,
+        reason: mailResult.reason || null
+      },
+      credentials: mailResult.sent
+        ? undefined
+        : {
+            username: cocircular.email,
+            password
+          }
     });
   } catch (error) {
     console.error('Onboard co-circular error:', error);

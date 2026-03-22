@@ -2,18 +2,30 @@ import nodemailer from 'nodemailer';
 import config from '../config.js';
 import { authEventTemplate, credentialsTemplate, holidayEventTemplate } from './emailTemplates.js';
 
+const safe = (value) => String(value || '').trim();
+
 const hasMailerConfig = () => {
-  return config.email.isConfigured;
+  const host = safe(config.email?.smtp?.host);
+  const user = safe(config.email?.smtp?.user);
+  const pass = safe(config.email?.smtp?.pass);
+  const port = Number(config.email?.smtp?.port || 0);
+  return Boolean(host && user && pass && port);
 };
 
 const createTransporter = () => {
+  const host = safe(config.email.smtp.host);
+  const port = Number(config.email.smtp.port || 587);
+  const user = safe(config.email.smtp.user);
+  const pass = safe(config.email.smtp.pass);
+
   return nodemailer.createTransport({
-    host: config.email.smtp.host,
-    port: config.email.smtp.port,
-    secure: config.email.smtp.port === 465,
+    host,
+    port,
+    secure: port === 465,
+    requireTLS: port !== 465,
     auth: {
-      user: config.email.smtp.user,
-      pass: config.email.smtp.pass
+      user,
+      pass
     }
   });
 };
@@ -25,8 +37,14 @@ const sendMail = async ({ to, subject, text, html }) => {
 
   try {
     const transporter = createTransporter();
+    const fromEmail = safe(config.email.smtp.from) || safe(config.email.smtp.user);
+
+    if (!fromEmail) {
+      return { sent: false, reason: 'SMTP from email is missing' };
+    }
+
     await transporter.sendMail({
-      from: config.email.smtp.from,
+      from: fromEmail,
       to,
       subject,
       text,
