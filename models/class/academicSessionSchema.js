@@ -17,6 +17,31 @@ const academicSessionSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
+  },
+  holidays: {
+    type: [
+      {
+        title: {
+          type: String,
+          required: true,
+          trim: true
+        },
+        date: {
+          type: Date,
+          required: true
+        },
+        description: {
+          type: String,
+          default: '',
+          trim: true
+        },
+        isActive: {
+          type: Boolean,
+          default: true
+        }
+      }
+    ],
+    default: []
   }
 }, { timestamps: true });
 

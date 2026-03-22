@@ -6,6 +6,14 @@ import { StudentAttendance } from '../../models/student/studentAttendanceSchema.
 import { TestSubmission } from '../../models/App/testSubmissionSchema.js';
 import { generateTempPassword, generateUsernameFromName } from '../../utils/credentials.js';
 import { sendCredentialTemplateEmail } from '../../utils/mailer.js';
+import mongoose from 'mongoose';
+
+const normalizeId = (value) => {
+  const normalized = String(value || '').trim();
+  return normalized || '';
+};
+
+const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(String(value || '').trim());
 
 const getNextRollNumber = async (classId, sessionId) => {
   const count = await Student.countDocuments({ classId, sessionId });
@@ -17,16 +25,26 @@ const addStudentByTeacher = async (req, res) => {
     const teacherId = req.teacher?.userId;
     const { name, username, email, phoneNumber, classId, sessionId } = req.body;
 
-    if (!name || !email || !phoneNumber || !classId || !sessionId) {
+    const normalizedName = String(name || '').trim();
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+    const normalizedPhoneNumber = String(phoneNumber || '').trim();
+    const normalizedClassId = normalizeId(classId);
+    const normalizedSessionId = normalizeId(sessionId);
+
+    if (!normalizedName || !normalizedEmail || !normalizedPhoneNumber || !normalizedClassId || !normalizedSessionId) {
       return res.json({ success: false, message: 'name, email, phoneNumber, classId and sessionId are required' });
     }
 
-    const classData = await Class.findById(classId).select('_id teacherId teacherIds sessionId isActive');
+    if (!isValidObjectId(normalizedClassId) || !isValidObjectId(normalizedSessionId)) {
+      return res.json({ success: false, message: 'Invalid classId or sessionId' });
+    }
+
+    const classData = await Class.findById(normalizedClassId).select('_id teacherId teacherIds sessionId isActive');
     if (!classData || classData.isActive === false) {
       return res.json({ success: false, message: 'Invalid classId' });
     }
 
-    if (String(classData.sessionId || '') !== String(sessionId)) {
+    if (String(classData.sessionId || '') !== normalizedSessionId) {
       return res.json({ success: false, message: 'sessionId does not match selected class' });
     }
 
@@ -39,37 +57,46 @@ const addStudentByTeacher = async (req, res) => {
       return res.json({ success: false, message: 'You are not assigned to this class' });
     }
 
+    let shouldSaveClass = false;
     if (teacherId && !classTeacherIds.includes(String(teacherId))) {
       classData.teacherIds = [...(classData.teacherIds || []), teacherId];
+      shouldSaveClass = true;
     }
 
     if (!classData.teacherId && teacherId) {
       classData.teacherId = teacherId;
-      await classData.save();
-    } else if (teacherId && !isTeacherAssigned) {
+      shouldSaveClass = true;
+    }
+
+    if (shouldSaveClass) {
       await classData.save();
     }
 
-    const generatedUsername = String(username || generateUsernameFromName(name)).trim().toLowerCase();
+    const generatedUsername = String(username || generateUsernameFromName(normalizedName)).trim().toLowerCase();
     const existingByUsername = await Student.findOne({ username: generatedUsername });
     if (existingByUsername) {
       return res.json({ success: false, message: 'Username already exists. Please use another username.' });
     }
 
+    const existingByEmail = await Student.findOne({ email: normalizedEmail });
+    if (existingByEmail) {
+      return res.json({ success: false, message: 'Email already exists. Please use another email.' });
+    }
+
     const plainPassword = generateTempPassword();
     const hashedPassword = await bcrypt.hash(plainPassword, 10);
-    const rollNumber = await getNextRollNumber(classId, sessionId);
+    const rollNumber = await getNextRollNumber(normalizedClassId, normalizedSessionId);
 
     const student = await Student.create({
-      name,
+      name: normalizedName,
       username: generatedUsername,
-      email: String(email).toLowerCase(),
+      email: normalizedEmail,
       password: hashedPassword,
-      phoneNumber,
+      phoneNumber: normalizedPhoneNumber,
       rollNumber,
       registrationNumber: rollNumber,
-      classId: String(classId),
-      sessionId: String(sessionId)
+      classId: normalizedClassId,
+      sessionId: normalizedSessionId
     });
 
     const mailResult = await sendCredentialTemplateEmail({

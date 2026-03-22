@@ -16,8 +16,8 @@ const getCertificate =async (req,res) => {
             if(!member){
               return  res.json({success:false, message:"user is not find"});
             }
-            const {_id,type,name, subject,joinTime,isCertify,image,linkedin,classTeacher,leaveTime,speciality,isTop,yog}= member;
-            const sendData = {_id,type,name, subject,joinTime,isCertify,image,linkedin,classTeacher,leaveTime,speciality,isTop,yog}
+            const {_id,type,name,joinTime,image,linkedin,classTeacher,leaveTime,speciality,isTop,yog}= member;
+            const sendData = {_id,type,name,joinTime,image,linkedin,classTeacher,leaveTime,speciality,isTop,yog}
            return  res.json({success:true, data:sendData});
         }
         else if(type==2){
@@ -37,7 +37,7 @@ const DownloadCirtificate =async (req,res) => {
             return res.json({success: false, message:"user is not valid"});
         }
         if(type ==1 ){
-            const member = await MemberModel.findOne({ _id: id, isCertify: true });
+            const member = await MemberModel.findOne({ _id: id });
             if(!member){
                 res.json({success:false, message:"user is not find"});
             }

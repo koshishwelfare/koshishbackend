@@ -5,6 +5,7 @@ import { clearAuthCookie, setAuthCookie } from '../../config/authCookies.js';
 import { generateTempPassword } from '../../utils/credentials.js';
 import { sendAuthNotificationEmail, sendCredentialTemplateEmail } from '../../utils/mailer.js';
 import { createStudentToken } from '../../utils/authToken.js';
+import { cloudinaryUploadImage } from '../../middleware/cloudimage/cloudinary.js';
 
 const sanitizeStudent = (studentDoc) => {
   return {
@@ -17,6 +18,8 @@ const sanitizeStudent = (studentDoc) => {
     phoneNumber: studentDoc.phoneNumber,
     course: studentDoc.course,
     year: studentDoc.year,
+    classId: studentDoc.classId,
+    sessionId: studentDoc.sessionId,
     profileImage: studentDoc.profileImage,
     bio: studentDoc.bio
   };
@@ -137,7 +140,9 @@ const loginStudent = async (req, res) => {
 
 const getStudentProfile = async (req, res) => {
   try {
-    const student = await Student.findById(req.studentId);
+    const student = await Student.findById(req.studentId)
+      .populate('classId', '_id name grade section')
+      .populate('sessionId', '_id name startYear endYear');
     if (!student) {
       return res.json({ success: false, message: 'Student not found' });
     }
@@ -155,12 +160,20 @@ const getStudentProfile = async (req, res) => {
 
 const updateStudentProfile = async (req, res) => {
   try {
-    const allowedFields = ['name', 'phoneNumber', 'course', 'year', 'bio', 'profileImage'];
+    // Only personal data can be updated by student. Campus data is admin-managed.
+    const allowedFields = ['name', 'phoneNumber', 'bio', 'profileImage'];
     const updateData = {};
 
     for (const field of allowedFields) {
       if (req.body[field] !== undefined) {
         updateData[field] = req.body[field];
+      }
+    }
+
+    if (req.file) {
+      const imageUpload = await cloudinaryUploadImage(req.file);
+      if (imageUpload?.secure_url) {
+        updateData.profileImage = imageUpload.secure_url;
       }
     }
 

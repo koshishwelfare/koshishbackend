@@ -18,7 +18,18 @@ const haversineDistanceMeters = (lat1, lon1, lat2, lon2) => {
 
 const markTeacherSelfAttendance = async (req, res) => {
   try {
-    const { teacherId, classId, qrToken, latitude, longitude, date, remarks = '', status = 'Present' } = req.body;
+    const {
+      teacherId,
+      classId,
+      subjectId,
+      chapterId,
+      qrToken,
+      latitude,
+      longitude,
+      date,
+      remarks = '',
+      status = 'Present'
+    } = req.body;
 
     const effectiveTeacherId = req.teacher?.userId || teacherId;
 
@@ -50,13 +61,14 @@ const markTeacherSelfAttendance = async (req, res) => {
       return res.json({ success: false, message: 'Teacher not found or inactive' });
     }
 
-    const classData = await Class.findById(classId).select('_id teacherId teacherIds isActive');
+    const classData = await Class.findById(classId).select('_id mentorId teacherId teacherIds subjects isActive');
     if (!classData || classData.isActive === false) {
       return res.json({ success: false, message: 'Invalid classId' });
     }
 
     const classTeacherIds = Array.isArray(classData.teacherIds) ? classData.teacherIds.map((id) => String(id)) : [];
     const isTeacherAssigned =
+      (classData.mentorId && String(classData.mentorId) === String(effectiveTeacherId)) ||
       (classData.teacherId && String(classData.teacherId) === String(effectiveTeacherId)) ||
       classTeacherIds.includes(String(effectiveTeacherId));
 
@@ -73,6 +85,31 @@ const markTeacherSelfAttendance = async (req, res) => {
       await classData.save();
     } else if (!isTeacherAssigned) {
       await classData.save();
+    }
+
+    let normalizedSubjectId = null;
+    let normalizedSubjectName = '';
+    let normalizedChapterId = null;
+    let normalizedChapterTitle = '';
+
+    if (subjectId) {
+      const subject = classData.subjects?.id(subjectId);
+      if (!subject) {
+        return res.json({ success: false, message: 'Invalid subjectId for selected class' });
+      }
+      normalizedSubjectId = subject._id;
+      normalizedSubjectName = subject.name || '';
+
+      if (chapterId) {
+        const chapter = subject.chapters?.id(chapterId);
+        if (!chapter) {
+          return res.json({ success: false, message: 'Invalid chapterId for selected subject' });
+        }
+        normalizedChapterId = chapter._id;
+        normalizedChapterTitle = chapter.title || '';
+      }
+    } else if (chapterId) {
+      return res.json({ success: false, message: 'subjectId is required when chapterId is provided' });
     }
 
     const centerLat = Number(process.env.TEACHER_ATTENDANCE_CENTER_LAT);
@@ -103,6 +140,10 @@ const markTeacherSelfAttendance = async (req, res) => {
       {
         teacherId: effectiveTeacherId,
         classId,
+        subjectId: normalizedSubjectId,
+        subjectName: normalizedSubjectName,
+        chapterId: normalizedChapterId,
+        chapterTitle: normalizedChapterTitle,
         date: effectiveDate,
         status,
         remarks,
@@ -147,6 +188,7 @@ const getTeacherAttendance = async (req, res) => {
     const data = await TeacherAttendance.find(filter)
       .populate('teacherId', 'username email phoneNumber')
       .populate('classId', 'name grade section')
+      .select('teacherId classId subjectId subjectName chapterId chapterTitle date status remarks createdAt')
       .sort({ date: -1, createdAt: -1 });
 
     return res.json({ success: true, message: 'Teacher attendance fetched successfully', data });

@@ -15,15 +15,13 @@ const memberProjection = {
 
 const memberListFilterFields = [
   "isActive",
-  "isVisionary",
   "isTop",
-  "isCertify",
   "type",
   "role",
   "yog"
 ];
 
-const memberSearchFields = ["name", "speciality", "quote", "aboutHead", "subject"];
+const memberSearchFields = ["name", "speciality", "quote", "aboutHead"];
 const memberSortFields = ["joinTime", "name", "yog"];
 
 const listMembers = async (req, res, { baseFilter = {}, projection = memberProjection, message }) => {
@@ -78,4 +76,30 @@ const memberList =async (req,res) => {
   }
 }
 
-export { memberList }
+const coCircularMemberList = async (req, res) => {
+  try {
+    return await listMembers(req, res, {
+      baseFilter: { isActive: true, role: 'cocurricular' },
+      projection: memberProjection,
+      message: "Co-curricular member list found"
+    });
+  } catch (error) {
+    console.log(error)
+    res.json({success:false , message: error.message});
+  }
+}
+
+const collaboratorMemberList = async (req, res) => {
+  try {
+    return await listMembers(req, res, {
+      baseFilter: { isActive: true, role: 'collaborator' },
+      projection: memberProjection,
+      message: "Collaborator list found"
+    });
+  } catch (error) {
+    console.log(error)
+    res.json({success:false , message: error.message});
+  }
+}
+
+export { memberList, coCircularMemberList, collaboratorMemberList }

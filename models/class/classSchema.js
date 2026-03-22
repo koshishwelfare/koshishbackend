@@ -1,6 +1,79 @@
 import mongoose from "mongoose";
 import validator from "validator";
 
+const chapterSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    description: {
+      type: String,
+      default: ''
+    },
+    isTaught: {
+      type: Boolean,
+      default: false
+    },
+    taughtAt: {
+      type: Date,
+      default: null
+    },
+    taughtBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'TeacherModel',
+      default: null
+    },
+    taughtLogId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'DailyTeachingLog',
+      default: null
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    },
+    updatedAt: {
+      type: Date,
+      default: Date.now
+    }
+  },
+  { _id: true }
+);
+
+const subjectSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    description: {
+      type: String,
+      default: ''
+    },
+    addedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'TeacherModel',
+      default: null
+    },
+    chapters: {
+      type: [chapterSchema],
+      default: []
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    },
+    updatedAt: {
+      type: Date,
+      default: Date.now
+    }
+  },
+  { _id: true }
+);
+
 const classSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -38,6 +111,10 @@ const classSchema = new mongoose.Schema({
       ref: 'TeacherModel'
     }
   ],
+  subjects: {
+    type: [subjectSchema],
+    default: []
+  },
   isActive: {
     type: Boolean,
     default: true

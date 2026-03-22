@@ -65,4 +65,22 @@ const authEventTemplate = ({ role, eventType, actor, timestamp, ipAddress }) => 
   };
 };
 
-export { credentialsTemplate, authEventTemplate, onboardingTemplate };
+const holidayEventTemplate = ({ recipientName, sessionName, holidayTitle, holidayDate, description = '', action = 'updated' } = {}) => {
+  const safeName = recipientName || 'User';
+  const safeSession = sessionName || 'Academic Session';
+  const safeHoliday = holidayTitle || 'Holiday';
+  const safeDate = holidayDate || 'N/A';
+  const safeAction = String(action || 'updated').toLowerCase();
+
+  return {
+    subject: `${appName} | Holiday ${safeAction}: ${safeHoliday}`,
+    text: `Hello ${safeName},\n\nA holiday has been ${safeAction} for ${safeSession}.\n\nHoliday: ${safeHoliday}\nDate: ${safeDate}${description ? `\nDescription: ${description}` : ''}\n\nPlease check your schedule accordingly.`,
+    html: wrapHtml({
+      title: 'Holiday Notification',
+      heading: `Hello ${safeName}, a holiday has been ${safeAction}.`,
+      content: `<p><strong>Session:</strong> ${safeSession}</p><p><strong>Holiday:</strong> ${safeHoliday}</p><p><strong>Date:</strong> ${safeDate}</p>${description ? `<p><strong>Description:</strong> ${description}</p>` : ''}<p style="margin-top:16px">Please check your schedule accordingly.</p>`
+    })
+  };
+};
+
+export { credentialsTemplate, authEventTemplate, onboardingTemplate, holidayEventTemplate };

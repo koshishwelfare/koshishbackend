@@ -1,4 +1,5 @@
 import express from 'express'
+import upload from '../middleware/cloudimage/multer.js';
 import {
 	getStudentProfile,
 	loginStudent,
@@ -20,6 +21,11 @@ import {
 	listStudentAssignments,
 	markStudentSelfAttendance
 } from '../controller/user/studentDashboardController.js';
+import {
+	listStudentFollowing,
+	studentFollowTeacher,
+	studentUnfollowTeacher
+} from '../controller/social/followController.js';
 import studentAuth from '../middleware/authentication/studentAuth.js';
 
 const userRoutes = express.Router();
@@ -29,7 +35,7 @@ userRoutes.post('/student/login', loginStudent);
 userRoutes.post('/student/recover-credentials', recoverStudentCredentialsByEmail);
 userRoutes.post('/student/logout', logoutStudent);
 userRoutes.get('/student/profile', studentAuth, getStudentProfile);
-userRoutes.patch('/student/profile', studentAuth, updateStudentProfile);
+userRoutes.patch('/student/profile', studentAuth, upload.single('image'), updateStudentProfile);
 userRoutes.get('/student/dashboard', studentAuth, getStudentDashboard);
 userRoutes.get('/student/test-series', studentAuth, listStudentTests);
 userRoutes.get('/student/test-series/:testId', studentAuth, getStudentTestById);
@@ -39,5 +45,8 @@ userRoutes.get('/student/test-series/:testId/leaderboard', studentAuth, getTestL
 userRoutes.get('/student/attendance', studentAuth, getStudentAttendance);
 userRoutes.post('/student/attendance/self-mark', studentAuth, markStudentSelfAttendance);
 userRoutes.get('/student/assignments', studentAuth, listStudentAssignments);
+userRoutes.post('/student/follow/:teacherId', studentAuth, studentFollowTeacher);
+userRoutes.delete('/student/follow/:teacherId', studentAuth, studentUnfollowTeacher);
+userRoutes.get('/student/following', studentAuth, listStudentFollowing);
 
 export default userRoutes

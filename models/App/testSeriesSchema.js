@@ -63,6 +63,12 @@ const testSeriesSchema = new mongoose.Schema({
     type: String,
     enum: ['teacher', 'coordinator', 'cocirculer'],
     default: 'teacher'
+  },
+  createdById: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'TeacherModel',
+    default: null,
+    index: true
   }
 }, { timestamps: true });
 

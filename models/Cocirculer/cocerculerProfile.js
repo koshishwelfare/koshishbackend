@@ -28,6 +28,14 @@ const CocicularSchema = new mongoose.Schema(
       // required: true,
       default:"B.tech"
     },
+    linkedin: {
+      type: String,
+      default: ''
+    },
+    quote: {
+      type: String,
+      default: ''
+    },
     about: {
       type: String,
       required: true,

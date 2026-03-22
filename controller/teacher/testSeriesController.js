@@ -24,7 +24,8 @@ const addTestSeries = async (req, res) => {
       durationMinutes,
       isActive: isActive !== undefined ? Boolean(isActive) : true,
       questions: normalizedQuestions,
-      createdByRole: 'teacher'
+      createdByRole: 'teacher',
+      createdById: req.teacher?.userId || null
     });
 
     return res.json({ success: true, message: 'Test series added successfully', data: test });

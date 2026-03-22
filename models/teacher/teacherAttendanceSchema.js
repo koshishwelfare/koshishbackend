@@ -12,6 +12,22 @@ const teacherAttendanceSchema = new mongoose.Schema({
     ref: 'Classes',
     default: null
   },
+  subjectId: {
+    type: mongoose.Schema.Types.ObjectId,
+    default: null
+  },
+  subjectName: {
+    type: String,
+    default: ''
+  },
+  chapterId: {
+    type: mongoose.Schema.Types.ObjectId,
+    default: null
+  },
+  chapterTitle: {
+    type: String,
+    default: ''
+  },
   date: {
     type: String,
     required: true,

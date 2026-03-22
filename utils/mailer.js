@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 import config from '../config.js';
-import { authEventTemplate, credentialsTemplate } from './emailTemplates.js';
+import { authEventTemplate, credentialsTemplate, holidayEventTemplate } from './emailTemplates.js';
 
 const hasMailerConfig = () => {
   return config.email.isConfigured;
@@ -57,4 +57,21 @@ const sendAuthNotificationEmail = async ({ to, role, eventType, actor, timestamp
   return await sendMail({ to, ...payload });
 };
 
-export { sendCredentialsEmail, sendCredentialTemplateEmail, sendAuthNotificationEmail };
+const sendHolidayNotificationEmail = async ({ to, recipientName, sessionName, holidayTitle, holidayDate, description, action }) => {
+  if (!to) {
+    return { sent: false, reason: 'notification recipient missing' };
+  }
+
+  const payload = holidayEventTemplate({
+    recipientName,
+    sessionName,
+    holidayTitle,
+    holidayDate,
+    description,
+    action
+  });
+
+  return await sendMail({ to, ...payload });
+};
+
+export { sendCredentialsEmail, sendCredentialTemplateEmail, sendAuthNotificationEmail, sendHolidayNotificationEmail };

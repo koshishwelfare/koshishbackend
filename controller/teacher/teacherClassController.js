@@ -10,7 +10,7 @@ const getMyClasses = async (req, res) => {
 
     const directClasses = await Class.find({
       isActive: true,
-      $or: [{ teacherId }, { teacherIds: teacherId }]
+      $or: [{ teacherId }, { teacherIds: teacherId }, { mentorId: teacherId }]
     })
       .select('_id name grade section sessionId')
       .populate('sessionId', 'name startYear endYear')

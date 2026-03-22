@@ -11,6 +11,26 @@ const isWorkingDay = (dateValue) => {
   return day >= 1 && day <= 5;
 };
 
+const normalizeText = (value) => String(value || '').trim();
+
+const findSubjectByName = (classData, subjectName) => {
+  const normalized = normalizeText(subjectName).toLowerCase();
+  if (!normalized) return null;
+
+  return (classData.subjects || []).find(
+    (subject) => normalizeText(subject.name).toLowerCase() === normalized
+  ) || null;
+};
+
+const findChapterByTitle = (subject, chapterTitle) => {
+  const normalized = normalizeText(chapterTitle).toLowerCase();
+  if (!normalized) return null;
+
+  return (subject?.chapters || []).find(
+    (chapter) => normalizeText(chapter.title).toLowerCase() === normalized
+  ) || null;
+};
+
 const upsertDailyTeachingLog = async (req, res) => {
   try {
     const teacherId = req.teacher?.userId;
@@ -18,6 +38,8 @@ const upsertDailyTeachingLog = async (req, res) => {
       classId,
       date = new Date().toISOString().slice(0, 10),
       topic,
+      subjectName = '',
+      chapterTitle = '',
       summary = '',
       homework = '',
       nextPlan = '',
@@ -59,6 +81,8 @@ const upsertDailyTeachingLog = async (req, res) => {
         classId,
         date,
         topic,
+        subjectName: normalizeText(subjectName),
+        chapterTitle: normalizeText(chapterTitle),
         summary,
         homework,
         nextPlan,
@@ -67,7 +91,31 @@ const upsertDailyTeachingLog = async (req, res) => {
       { upsert: true, new: true, runValidators: true }
     );
 
-    return res.json({ success: true, message: 'Daily teaching log saved successfully', data });
+    let chapterUpdateMessage = null;
+    if (subjectName && chapterTitle) {
+      const fullClassData = await Class.findById(classId);
+      const subject = findSubjectByName(fullClassData, subjectName);
+      if (subject) {
+        const chapter = findChapterByTitle(subject, chapterTitle);
+        if (chapter) {
+          chapter.isTaught = true;
+          chapter.taughtAt = new Date();
+          chapter.taughtBy = teacherId;
+          chapter.taughtLogId = data._id;
+          chapter.updatedAt = new Date();
+          subject.updatedAt = new Date();
+          await fullClassData.save();
+          chapterUpdateMessage = 'Chapter marked as taught from daily teaching log';
+        }
+      }
+    }
+
+    return res.json({
+      success: true,
+      message: 'Daily teaching log saved successfully',
+      data,
+      chapterUpdateMessage
+    });
   } catch (error) {
     console.log(error);
     return res.json({ success: false, message: error.message });

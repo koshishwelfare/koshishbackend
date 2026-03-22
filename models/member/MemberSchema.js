@@ -62,12 +62,10 @@ const MemberSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  subject: {
-    type: String,
-    default: ''
-  },
+  
   classTeacher: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Class',
     default: ''
   },
   sessionId: {
@@ -88,25 +86,17 @@ const MemberSchema = new mongoose.Schema({
     default: '',
 
   },
-  isVisionary:{
-    type: Boolean ,
-    default:false
-  },
   isActive:{
     type: Boolean ,
     default:false
   },
-  isCertify:{
-    type: Boolean ,
-    default:false
-  },
-  type:{
-    type:Number,
-    default:1
-  },
+  // isCertify:{
+  //   type: Boolean ,
+  //   default:false
+  // },
   role: {
     type: String,
-    enum: ['mentor', 'sponsor', 'alumni', 'collaborator'],
+    enum: ['mentor', 'sponsor', 'alumni', 'visionary'],
     default: 'mentor',
     required: true
   },

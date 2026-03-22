@@ -2,7 +2,7 @@ import express from 'express'
 import authCociculer from '../middleware/authentication/cocirculerAuth.js';
 import loginCociculer from '../middleware/authentication/logincocerculer.js';
 import updatecocerculerprofile from '../controller/cocirculer/cocerculer.js';
-import{ addMentor,CertifyMember, terminateMentor, AllMentor,getMentorById, updateMentorById,TopMentor} from '../controller/cocirculer/mentor.js';
+import{ addMentor,CertifyMember, terminateMentor, AllMentor,getMentorById, updateMentorById,TopMentor, updateMemberRoleById} from '../controller/cocirculer/mentor.js';
 import { addHeader,updateHeader,AllHeader,HeaderChange,HeaderById } from '../controller/cocirculer/manageHeader.js';
 import { Addevent,updateEvent,hideEvent,EventById,topEvent,AllEvents,deleteById } from '../controller/cocirculer/event.js';
 import { addtestimorals,updatetestimorals,Alltestimorals,testimoralsById,TerminateTestimorals } from '../controller/cocirculer/testimorals.js';
@@ -15,18 +15,37 @@ import {
 	getAcademicSessions,
 	getAcademicSessionById,
 	updateAcademicSession,
+	listAcademicSessionHolidays,
+	addAcademicSessionHoliday,
+	updateAcademicSessionHoliday,
+	deleteAcademicSessionHoliday,
 	getMentorsForClass,
 	createClass,
 	getClasses,
 	getClassById,
 	updateClass
 } from '../controller/cocirculer/academicController.js';
+import {
+	listCocircularForConsole,
+	getCocircularForConsoleById,
+	createCocircularForConsole,
+	updateCocircularForConsole,
+	deleteCocircularForConsole
+} from '../controller/cocirculer/cocircularDirectory.js';
+import {
+  listCollaboratorsForConsole,
+  getCollaboratorForConsoleById,
+  createCollaboratorForConsole,
+  updateCollaboratorForConsole
+} from '../controller/cocirculer/collaboratorDirectory.js';
 import { getOwnProfile, updateOwnProfile } from '../controller/cocirculer/profileManagementController.js';
 import getCocirculerDashboard from '../controller/cocirculer/dashboard.js';
 import { logoutCocirculer } from '../controller/auth/logoutController.js';
 import { getTeacherAttendanceByDailyToken, getTeacherAttendanceDailyQr } from '../controller/cocirculer/teacherAttendanceQrController.js';
+import { recoverCocirculerCredentialsByEmail } from '../controller/cocirculer/authRecoveryController.js';
 const coCirculerRoutes = express.Router();
 coCirculerRoutes.post('/login', loginCociculer);
+coCirculerRoutes.post('/credentials/recover', recoverCocirculerCredentialsByEmail);
 coCirculerRoutes.post('/logout', logoutCocirculer);
 
 // coCirculerRoutes.get('/auth', authCociculer);
@@ -35,10 +54,20 @@ coCirculerRoutes.patch('/update/cocirculer-profile', authCociculer, updatecocerc
 coCirculerRoutes.post('/member/add', authCociculer,upload.single('image'),addMentor )
 coCirculerRoutes.get('/member/u/:id', authCociculer,getMentorById )
 coCirculerRoutes.patch('/member/update/:id', authCociculer,upload.single('image'),updateMentorById )
+coCirculerRoutes.patch('/member/role/:id', authCociculer, updateMemberRoleById )
 coCirculerRoutes.patch('/member/terminate/:id', authCociculer,terminateMentor )
 coCirculerRoutes.patch('/member/top/:id', authCociculer,TopMentor )
 coCirculerRoutes.get('/member/all', authCociculer, AllMentor)
 coCirculerRoutes.get('/member/certificate/:id', authCociculer, AllMentor)
+coCirculerRoutes.get('/cocircular/list', authCociculer, listCocircularForConsole)
+coCirculerRoutes.get('/cocircular/view/:id', authCociculer, getCocircularForConsoleById)
+coCirculerRoutes.post('/cocircular/add', authCociculer, upload.single('image'), createCocircularForConsole)
+coCirculerRoutes.patch('/cocircular/update/:id', authCociculer, upload.single('image'), updateCocircularForConsole)
+coCirculerRoutes.delete('/cocircular/delete/:id', authCociculer, deleteCocircularForConsole)
+coCirculerRoutes.get('/collaborators/list', authCociculer, listCollaboratorsForConsole)
+coCirculerRoutes.get('/collaborators/view/:id', authCociculer, getCollaboratorForConsoleById)
+coCirculerRoutes.post('/collaborators/add', authCociculer, upload.single('image'), createCollaboratorForConsole)
+coCirculerRoutes.patch('/collaborators/update/:id', authCociculer, upload.single('image'), updateCollaboratorForConsole)
 
 
 // event
@@ -84,6 +113,10 @@ coCirculerRoutes.post('/academic/session/add', authCociculer, addAcademicSession
 coCirculerRoutes.get('/academic/sessions', authCociculer, getAcademicSessions);
 coCirculerRoutes.get('/academic/session/:id', authCociculer, getAcademicSessionById);
 coCirculerRoutes.patch('/academic/session/update/:id', authCociculer, updateAcademicSession);
+coCirculerRoutes.get('/academic/holidays', authCociculer, listAcademicSessionHolidays);
+coCirculerRoutes.post('/academic/session/:sessionId/holidays/add', authCociculer, addAcademicSessionHoliday);
+coCirculerRoutes.patch('/academic/session/:sessionId/holidays/update/:holidayId', authCociculer, updateAcademicSessionHoliday);
+coCirculerRoutes.delete('/academic/session/:sessionId/holidays/delete/:holidayId', authCociculer, deleteAcademicSessionHoliday);
 coCirculerRoutes.get('/academic/mentors', authCociculer, getMentorsForClass);
 coCirculerRoutes.post('/academic/class/add', authCociculer, createClass);
 coCirculerRoutes.get('/academic/classes', authCociculer, getClasses);

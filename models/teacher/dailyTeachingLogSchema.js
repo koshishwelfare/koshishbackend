@@ -23,6 +23,16 @@ const dailyTeachingLogSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  subjectName: {
+    type: String,
+    default: '',
+    trim: true
+  },
+  chapterTitle: {
+    type: String,
+    default: '',
+    trim: true
+  },
   summary: {
     type: String,
     default: ''

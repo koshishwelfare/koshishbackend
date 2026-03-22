@@ -6,13 +6,13 @@ import { generateTempPassword, generateUsernameFromName } from '../../utils/cred
 import { sendCredentialTemplateEmail } from '../../utils/mailer.js';
 const addMentor = async(req, res ) => {
    try {
-          const {name,email,subject,isActive, isVisionary, isTop,classTeacher,linkedin,speciality,quote, aboutHead, about, role = 'mentor'}= req.body;
-          const allowedRoles = ['mentor', 'alumni', 'sponsor', 'collaborator'];
+          const {name,email,isActive, isTop,classTeacher,linkedin,speciality,quote, aboutHead, about, role = 'mentor'}= req.body;
+       const allowedRoles = ['mentor', 'alumni', 'sponsor', 'visionary'];
           if(!name || !email){
             return res.json({success:false, message:"fill all details"})
           }
           if (!allowedRoles.includes(String(role).toLowerCase())) {
-            return res.json({ success:false, message: 'Invalid role. Use mentor, alumni, sponsor, or collaborator' });
+            return res.json({ success:false, message: 'Invalid role. Use mentor, alumni, sponsor, or visionary' });
           }
 
           const normalizedEmail = String(email).trim().toLowerCase();
@@ -35,9 +35,7 @@ const addMentor = async(req, res ) => {
             email: normalizedEmail,
             username,
             password: hashedPassword,
-            subject: subject || 'General',
             isActive: typeof isActive === 'boolean' ? isActive : true,
-            isVisionary: Boolean(isVisionary),
             isTop: Boolean(isTop),
             speciality: speciality || 'General',
             linkedin: linkedin || 'https://linkedin.com',
@@ -46,8 +44,8 @@ const addMentor = async(req, res ) => {
             aboutHead: aboutHead || 'About',
             role: String(role).toLowerCase()
          }
-          if (typeof classTeacher === 'string' && classTeacher.trim()) {
-            memberData.classTeacher = classTeacher.trim();
+          if (classTeacher) {
+            memberData.classTeacher = classTeacher;
           }
           if (memberImage) {
             const imageData = await cloudinaryUploadImage(memberImage)
@@ -151,14 +149,14 @@ const updateMentorById = async( req , res)=>{
       try {
         const { id } = req.params;
         const { name, email, isActive, isTop, role } = req.body;
-        const allowedRoles = ['mentor', 'alumni', 'sponsor', 'collaborator'];
+  const allowedRoles = ['mentor', 'alumni', 'sponsor', 'visionary'];
 
         if (!name || !email) {
           return res.json({ success: false, message: 'name and email are required' });
         }
 
         if (role && !allowedRoles.includes(String(role).toLowerCase())) {
-          return res.json({ success: false, message: 'Invalid role. Use mentor, alumni, sponsor, or collaborator' });
+          return res.json({ success: false, message: 'Invalid role. Use mentor, alumni, sponsor, or visionary' });
         }
 
         await updateMentor(id, {
@@ -176,4 +174,43 @@ const updateMentorById = async( req , res)=>{
         return res.json({ success: false, message: error.message })
       }
 }
-export { addMentor, terminateMentor, AllMentor, updateMentorById,getMentorById,TopMentor,CertifyMember}
+const updateMemberRoleById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { role } = req.body;
+    const allowedRoles = ['mentor', 'alumni', 'sponsor', 'visionary'];
+
+    if (!role) {
+      return res.json({ success: false, message: 'role is required' });
+    }
+
+    const normalizedRole = String(role).trim().toLowerCase();
+    if (!allowedRoles.includes(normalizedRole)) {
+      return res.json({ success: false, message: 'Invalid role. Use mentor, alumni, sponsor, or visionary' });
+    }
+
+    const updated = await MemberModel.findByIdAndUpdate(
+      id,
+      { role: normalizedRole },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.json({ success: false, message: 'member not found' });
+    }
+
+    return res.json({
+      success: true,
+      message: 'member role updated',
+      data: {
+        _id: updated._id,
+        role: updated.role,
+        name: updated.name
+      }
+    });
+  } catch (error) {
+    return res.json({ success: false, message: error.message });
+  }
+}
+
+export { addMentor, terminateMentor, AllMentor, updateMentorById,getMentorById,TopMentor,CertifyMember, updateMemberRoleById}
