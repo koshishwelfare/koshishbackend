@@ -1,5 +1,6 @@
 import CocicularModel from '../../models/Cocirculer/cocerculerProfile.js';
 import { cloudinaryUploadImage } from '../../middleware/cloudimage/cloudinary.js';
+import logger from '../../notification/services/logger.js';
 
 const blockedFields = new Set(['_id', '__v', 'password', 'email', 'username', 'createdAt', 'updatedAt']);
 
@@ -18,7 +19,7 @@ const getOwnProfile = async (req, res) => {
 
     return res.json({ success: true, data: profile, message: 'Profile fetched successfully' });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch co-curricular profile', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -46,7 +47,7 @@ const updateOwnProfile = async (req, res) => {
           updates.image = imageUpload.secure_url;
         }
       } catch (imageError) {
-        console.log('Image upload error:', imageError);
+        logger.error('Co-curricular image upload failed', { error: imageError.message });
         return res.json({ success: false, message: 'Failed to upload image: ' + imageError.message });
       }
     }
@@ -58,7 +59,7 @@ const updateOwnProfile = async (req, res) => {
     await CocicularModel.findByIdAndUpdate(userId, updates, { runValidators: true });
     return res.json({ success: true, message: 'Profile updated successfully' });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to update co-curricular profile', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };

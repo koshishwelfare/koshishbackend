@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { Class } from '../../models/class/classSchema.js';
 import { Student } from '../../models/student/studentSchema.js';
+import logger from '../../notification/services/logger.js';
 
 const normalizeText = (value) => String(value || '').trim();
 
@@ -123,7 +124,7 @@ const addClassSubject = async (req, res) => {
       data: sanitizeCurriculum(classData)
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to add class subject', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -178,7 +179,7 @@ const addClassChapter = async (req, res) => {
       data: sanitizeCurriculum(classData)
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to update class subject', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -243,7 +244,7 @@ const markClassChapterTaught = async (req, res) => {
       data: sanitizeCurriculum(classData)
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to delete class subject', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -268,7 +269,7 @@ const getClassCurriculum = async (req, res) => {
       data: sanitizeCurriculum(classData)
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to add class chapter', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -377,7 +378,7 @@ const listAvailableStudentsForClass = async (req, res) => {
       }
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to update class chapter', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -461,7 +462,7 @@ const assignStudentsToClass = async (req, res) => {
       }
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to delete class chapter', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };

@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import MemberModel from '../../models/member/MemberSchema.js';
 import { generateTempPassword, generateUsernameFromName } from '../../utils/credentials.js';
 import { sendCredentialTemplateEmail } from '../../notification/index.js';
+import logger from '../../notification/services/logger.js';
 const addMentor = async(req, res ) => {
    try {
           const {name,email,isActive, isTop,classTeacher,linkedin,speciality,quote, aboutHead, about, role = 'mentor'}= req.body;
@@ -94,7 +95,7 @@ const terminateMentor = async (req,res)=>{
       res.json ({success:true, message: "Member status updated"});
     })
   } catch (error) {
-           console.log(error)
+           logger.error('Failed to add mentor', { error: error.message });
            res.json({success:true, message: error.message})
   }
 }
@@ -106,7 +107,7 @@ const CertifyMember = async (req,res)=>{
        res.json ({success:true, message: "Member is certify"});
     })
   } catch (error) {
-           console.log(error)
+           logger.error('Failed to list mentors', { error: error.message });
            res.json({success:true, message: error.message})
   }
 }
@@ -118,7 +119,7 @@ const TopMentor = async (req,res)=>{
       res.json ({success:true, message: "Top member status updated"});
     })
   } catch (error) {
-           console.log(error)
+           logger.error('Failed to get mentor by id', { error: error.message });
            res.json({success:true, message: error.message})
   }
 }
@@ -129,7 +130,7 @@ const AllMentor = async(req,res)=>{
     const data =  await AllMentorDB(filter) 
     return res.json({success:true, data, message : "All members found"});
   } catch (error) {
-           console.log(error)
+           logger.error('Failed to terminate mentor', { error: error.message });
            res.json({success:false, message: error.message})
   }
 }
@@ -140,7 +141,7 @@ const getMentorById = async(req,res)=>{
     const data = await  mentorByIdDB(id);
     return res.json({success:true, data, message : "Member found by id"});
   } catch (error) {
-           console.log(error)
+           logger.error('Failed to certify mentor', { error: error.message });
            res.json({success:true, message: error.message})
   }
 }

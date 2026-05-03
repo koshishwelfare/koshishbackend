@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import CocicularModel from '../../models/Cocirculer/cocerculerProfile.js';
 import { generateTempPassword } from '../../utils/credentials.js';
 import { sendCredentialTemplateEmail } from '../../notification/index.js';
+import logger from '../../notification/services/logger.js';
 
 const recoverCocirculerCredentialsByEmail = async (req, res) => {
   try {
@@ -44,7 +45,7 @@ const recoverCocirculerCredentialsByEmail = async (req, res) => {
           }
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to recover co-curricular credentials', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };

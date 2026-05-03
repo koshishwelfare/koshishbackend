@@ -1,6 +1,7 @@
 import { DailyTeachingLog } from '../../models/teacher/dailyTeachingLogSchema.js';
 import { TeacherAttendance } from '../../models/teacher/teacherAttendanceSchema.js';
 import { Class } from '../../models/class/classSchema.js';
+import logger from '../../notification/services/logger.js';
 
 const isWorkingDay = (dateValue) => {
   const parsed = new Date(dateValue);
@@ -117,7 +118,7 @@ const upsertDailyTeachingLog = async (req, res) => {
       chapterUpdateMessage
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to upsert daily teaching log', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -145,7 +146,7 @@ const getDailyTeachingLogs = async (req, res) => {
 
     return res.json({ success: true, message: 'Daily teaching logs fetched successfully', data });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch daily teaching logs', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };

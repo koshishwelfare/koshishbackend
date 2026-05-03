@@ -1,10 +1,11 @@
+import logger from "../../notification/services/logger.js";
 import { Announcement } from "../../models/App/announcementSchema.js";
 
 const saveAnnouncementDB = async(data)=>{
     try {
        await Announcement.create(data)
     } catch (error) {
-        console.log(error);
+        logger.error('Failed to save announcement', { error: error.message });
         throw Error(error.message)
     }
 }
@@ -24,7 +25,7 @@ const getNewsByIdDB = async(id)=>{
 const getNewsAllDB = async()=>{
     // console.log("I am get all News DB ")
     const data =  await Announcement.find({})
-    console.log(data)
+    logger.debug('Fetched announcements', { count: data.length });
     return data;
  }
  

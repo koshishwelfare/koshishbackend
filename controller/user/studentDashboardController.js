@@ -3,6 +3,7 @@ import { TestSeries } from '../../models/App/testSeriesSchema.js';
 import { TestSubmission } from '../../models/App/testSubmissionSchema.js';
 import { StudentAttendance } from '../../models/student/studentAttendanceSchema.js';
 import { Assignment } from '../../models/class/assignmentSchema.js';
+import logger from '../../notification/services/logger.js';
 
 const toRadians = (value) => (value * Math.PI) / 180;
 
@@ -56,7 +57,7 @@ const getStudentDashboard = async (req, res) => {
       }
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch student dashboard', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -80,7 +81,7 @@ const listStudentAssignments = async (req, res) => {
 
     return res.json({ success: true, message: 'Assignments fetched successfully', data });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to list student assignments', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -156,7 +157,7 @@ const markStudentSelfAttendance = async (req, res) => {
       data: attendance
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to mark student attendance', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };

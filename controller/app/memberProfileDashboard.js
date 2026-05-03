@@ -399,7 +399,7 @@ const getMemberProfileDashboard = async (req, res) => {
       }
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch member profile dashboard', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };

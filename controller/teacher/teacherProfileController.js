@@ -1,6 +1,7 @@
 import MemberModel from '../../models/member/MemberSchema.js';
 import bcrypt from 'bcrypt';
 import { cloudinaryUploadImage } from '../../middleware/cloudimage/cloudinary.js';
+import logger from '../../notification/services/logger.js';
 
 const sanitizeTeacher = (teacherDoc) => ({
   _id: teacherDoc._id,
@@ -44,7 +45,7 @@ const getTeacherProfile = async (req, res) => {
       teacher: sanitizeTeacher(teacher)
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch teacher profile', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -114,7 +115,7 @@ const updateTeacherProfile = async (req, res) => {
       teacher: sanitizeTeacher(teacher)
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to update teacher profile', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -147,7 +148,7 @@ const updateTeacherPassword = async (req, res) => {
 
     return res.json({ success: true, message: 'Password updated successfully' });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to update teacher password', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };

@@ -1,4 +1,5 @@
 
+import logger from '../../notification/services/logger.js';
 import MemberModel from "../../models/member/MemberSchema.js";
 
 const addMentorDB = async(mentorData)=>{
@@ -22,10 +23,10 @@ const topMentorDB = async(id)=>{
 const AllMentorDB = async (filter = {})=>{
    try {
       const data = await MemberModel.find(filter);
-      console.log(data);
+      logger.debug('Fetched mentors', { count: data.length });
       return data.reverse()
    } catch (error) {
-      // console.log("AllMentorDB :", error)
+      logger.error('Failed to fetch mentors', { error: error.message });
    }
    
    
@@ -34,13 +35,13 @@ const AllMentorDB = async (filter = {})=>{
 }
 const mentorByIdDB = async (id)=>{
    const data = await MemberModel.findById(id);
-   console.log(data);
+   logger.debug('Fetched mentor by id', { id, found: !!data });
 //    const myData = 
    return data
 }
 const AllAlumniDB = async ()=>{
    const data = await MemberModel.find({isActive:false});
-   console.log(data);
+   logger.debug('Fetched alumni', { count: data.length });
 //    const myData = 
    return data.reverse()
 }
@@ -58,7 +59,7 @@ const updateMentor = async (id, data)=>{
          // console.error('Error updating user:', error);
        });
    } catch (error) {
-      console.log(error);
+         logger.error('Failed to update mentor', { error: error.message });
    }
     
 }

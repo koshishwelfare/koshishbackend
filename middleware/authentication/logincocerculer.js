@@ -1,6 +1,7 @@
 import { setAuthCookie } from '../../config/authCookies.js';
 import { createRoleToken } from '../../utils/authToken.js';
 import { sendAuthNotificationEmail } from '../../notification/index.js';
+import logger from '../../notification/services/logger.js';
 
 import bcrypt from 'bcrypt';
 import CocicularModel from '../../models/Cocirculer/cocerculerProfile.js';
@@ -53,7 +54,7 @@ const loginCociculer = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Co-Curricular login error:', error);
+    logger.error('Co-Curricular login error', { error: error.message });
     return res.json({
       success: false,
       message: error.message

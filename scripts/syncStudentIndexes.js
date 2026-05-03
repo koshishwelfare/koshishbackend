@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import config from '../config.js';
 import { Student } from '../models/student/studentSchema.js';
+import logger from '../notification/services/logger.js';
 
 const run = async () => {
   try {
@@ -10,23 +11,25 @@ const run = async () => {
       useUnifiedTopology: true
     });
 
-    console.log('Connected to MongoDB');
+    logger.info('Connected to MongoDB');
 
     const before = await Student.collection.indexes();
-    console.log('Indexes before sync:');
-    console.table(before.map((idx) => ({ name: idx.name, key: JSON.stringify(idx.key), unique: !!idx.unique })));
+    logger.info('Indexes before sync', {
+      indexes: before.map((idx) => ({ name: idx.name, key: JSON.stringify(idx.key), unique: !!idx.unique }))
+    });
 
     const dropped = await Student.syncIndexes();
-    console.log('Dropped indexes:', dropped);
+    logger.info('Dropped indexes', { dropped });
 
     const after = await Student.collection.indexes();
-    console.log('Indexes after sync:');
-    console.table(after.map((idx) => ({ name: idx.name, key: JSON.stringify(idx.key), unique: !!idx.unique })));
+    logger.info('Indexes after sync', {
+      indexes: after.map((idx) => ({ name: idx.name, key: JSON.stringify(idx.key), unique: !!idx.unique }))
+    });
 
-    console.log('Student index sync completed.');
+    logger.info('Student index sync completed');
     process.exit(0);
   } catch (error) {
-    console.error('Failed to sync student indexes:', error);
+    logger.error('Failed to sync student indexes', { error: error.message });
     process.exit(1);
   }
 };

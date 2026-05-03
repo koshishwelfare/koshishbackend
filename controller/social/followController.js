@@ -1,6 +1,7 @@
 import MemberModel from '../../models/member/MemberSchema.js';
 import { Follow } from '../../models/member/followSchema.js';
 import { MemberActivity } from '../../models/member/memberActivitySchema.js';
+import logger from '../../notification/services/logger.js';
 
 const parsePositiveInt = (value, fallback) => {
   const parsed = Number(value);
@@ -38,7 +39,7 @@ const studentFollowTeacher = async (req, res) => {
       message: `You are now following ${targetTeacher.name}`
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to follow teacher as student', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -50,7 +51,7 @@ const studentUnfollowTeacher = async (req, res) => {
 
     return res.json({ success: true, message: 'Unfollowed successfully' });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to unfollow teacher as student', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -83,7 +84,7 @@ const listStudentFollowing = async (req, res) => {
       }
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to list student following', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -122,7 +123,7 @@ const teacherFollowTeacher = async (req, res) => {
       message: `You are now following ${targetTeacher.name}`
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to follow teacher as teacher', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -139,7 +140,7 @@ const teacherUnfollowTeacher = async (req, res) => {
     await Follow.deleteOne({ followerTeacherId, followingTeacherId: teacherId });
     return res.json({ success: true, message: 'Unfollowed successfully' });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to unfollow teacher as teacher', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -177,7 +178,7 @@ const listTeacherFollowing = async (req, res) => {
       }
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to list teacher following', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -215,7 +216,7 @@ const teacherAddProfileActivity = async (req, res) => {
       data
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to add teacher profile activity', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };

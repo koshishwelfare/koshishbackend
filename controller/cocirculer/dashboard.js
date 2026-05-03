@@ -5,6 +5,7 @@ import { Student } from '../../models/student/studentSchema.js';
 import { TestSeries } from '../../models/App/testSeriesSchema.js';
 import { Assignment } from '../../models/class/assignmentSchema.js';
 import { StudentAttendance } from '../../models/student/studentAttendanceSchema.js';
+import logger from '../../notification/services/logger.js';
 
 const getCocirculerDashboard = async (req, res) => {
     try {
@@ -65,7 +66,7 @@ const getCocirculerDashboard = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error);
+        logger.error('Failed to fetch co-curricular dashboard', { error: error.message });
         return res.json({ success: false, message: error.message });
     }
 };

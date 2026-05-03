@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import logger from './notification/services/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -48,6 +49,21 @@ const config = {
       user: smtpUser,
       pass: smtpPass,
       from: smtpFrom,
+    },
+    queue: {
+      enabled: String(process.env.EMAIL_QUEUE_ENABLED || '').trim().toLowerCase() === 'true',
+      provider: String(process.env.EMAIL_QUEUE_PROVIDER || 'none').trim().toLowerCase(),
+      region: String(process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || '').trim(),
+      queueUrl: String(process.env.EMAIL_QUEUE_URL || '').trim(),
+      queueName: String(process.env.EMAIL_QUEUE_NAME || '').trim(),
+      endpoint: String(process.env.AWS_SQS_ENDPOINT || '').trim(),
+      accessKeyId: String(process.env.AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY || '').trim(),
+      secretAccessKey: String(process.env.AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_KEY || '').trim(),
+      sessionToken: String(process.env.AWS_SESSION_TOKEN || '').trim(),
+      waitTimeSeconds: parseInt(process.env.EMAIL_QUEUE_WAIT_TIME_SECONDS, 10) || 20,
+      visibilityTimeout: parseInt(process.env.EMAIL_QUEUE_VISIBILITY_TIMEOUT, 10) || 60,
+      maxMessages: parseInt(process.env.EMAIL_QUEUE_MAX_MESSAGES, 10) || 10,
+      pollDelayMs: parseInt(process.env.EMAIL_QUEUE_POLL_DELAY_MS, 10) || 5000,
     },
     isConfigured: Boolean(smtpHost && smtpPort && smtpUser && smtpPass),
   },
@@ -103,7 +119,7 @@ if (config.server.nodeEnv === 'production') {
   });
 
   if (missing.length > 0) {
-    console.error('Missing required environment variables:', missing);
+    logger.error('Missing required environment variables', { missing });
     process.exit(1);
   }
 }

@@ -1,6 +1,7 @@
 import { getTeacherAttendanceQrPayload } from '../../utils/teacherAttendanceQr.js';
 import { TeacherAttendance } from '../../models/teacher/teacherAttendanceSchema.js';
 import mongoose from 'mongoose';
+import logger from '../../notification/services/logger.js';
 
 const toPositiveInt = (value, fallback) => {
   const parsed = Number(value);
@@ -41,7 +42,7 @@ const getTeacherAttendanceDailyQr = async (req, res) => {
       data: payload
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to generate teacher attendance QR', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -221,7 +222,7 @@ const getTeacherAttendanceByDailyToken = async (req, res) => {
       }
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch teacher attendance QR payload', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };

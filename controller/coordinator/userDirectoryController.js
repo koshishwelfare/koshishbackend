@@ -6,6 +6,7 @@ import { Class } from '../../models/class/classSchema.js';
 import { homeEventsModel } from '../../models/Events/eventsSchema.js';
 import { Announcement } from '../../models/App/announcementSchema.js';
 import { GalleryModel } from '../../models/Gallary/gallerySchema.js';
+import logger from '../../notification/services/logger.js';
 
 const buildPagination = (page, limit, total) => ({
   page,
@@ -67,7 +68,7 @@ const listMembersForCoordinator = async (req, res) => {
       pagination: buildPagination(safePage, safeLimit, total)
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to list members for coordinator', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -125,7 +126,7 @@ const listStudentsForCoordinator = async (req, res) => {
       pagination: buildPagination(safePage, safeLimit, total)
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to list members for coordinator', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -183,7 +184,7 @@ const listSessionsForCoordinator = async (req, res) => {
       pagination: buildPagination(safePage, safeLimit, total)
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch student directory entries', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -245,7 +246,7 @@ const listSessionClassesForCoordinator = async (req, res) => {
       pagination: buildPagination(safePage, safeLimit, total)
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch teacher directory entries', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -295,7 +296,7 @@ const listEventsForCoordinator = async (req, res) => {
       pagination: buildPagination(safePage, safeLimit, total)
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch co-curricular directory entries', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -342,7 +343,7 @@ const listNewsForCoordinator = async (req, res) => {
       pagination: buildPagination(safePage, safeLimit, total)
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch class directory entries', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -393,7 +394,7 @@ const listGalleryForCoordinator = async (req, res) => {
       pagination: buildPagination(safePage, safeLimit, total)
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch session directory entries', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -407,7 +408,7 @@ const getCocircularProfileByIdForCoordinator = async (req, res) => {
     }
     return res.json({ success: true, data: profile });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch announcement directory entries', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -421,7 +422,7 @@ const getTeacherProfileByIdForCoordinator = async (req, res) => {
     }
     return res.json({ success: true, data: profile });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch event directory entries', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -437,7 +438,7 @@ const getStudentProfileByIdForCoordinator = async (req, res) => {
     }
     return res.json({ success: true, data: profile });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch gallery directory entries', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };

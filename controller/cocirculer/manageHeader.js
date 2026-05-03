@@ -1,5 +1,6 @@
 import { headerModel } from "../../models/App/headerSchema.js";
 import { cloudinaryUploadImage, cloudinaryRemoveImage } from "../../middleware/cloudimage/cloudinary.js";
+import logger from '../../notification/services/logger.js';
 
 const addHeader = async(req,res) => {
   try {
@@ -59,7 +60,7 @@ const AllHeader = async(req,res) => {
    
     res.json({success:true,data, message:"All Header is found"});
   } catch (error) {
-    console.error(error)
+    logger.error('Failed to add header', { error: error.message });
     res.send({success:false, message: error.message});
   }
 }

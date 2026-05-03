@@ -2,6 +2,7 @@ import config from '../../config.js';
 import { setAuthCookie } from '../../config/authCookies.js';
 import { createRoleToken } from '../../utils/authToken.js';
 import { sendAuthNotificationEmail } from '../../notification/index.js';
+import logger from '../../notification/services/logger.js';
 
 const loginCoordinater = async (req, res) => {
   try {
@@ -38,7 +39,7 @@ const loginCoordinater = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
   } catch (error) {
-    console.error('Coordinator login error:', error);
+    logger.error('Coordinator login error', { error: error.message });
     return res.status(500).json({ success: false, message: 'Coordinator login failed' });
   }
 };

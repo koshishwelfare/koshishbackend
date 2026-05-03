@@ -1,6 +1,7 @@
 import {v2 as cloudinary} from 'cloudinary'
   // Cloudinary Upload Image
 import fs from 'fs'
+import logger from '../../notification/services/logger.js';
 const cloudinaryUploadImage =  async(fileToUpload) => {
     try {
       // console.log('i am cloudnaryupload function', fileToUpload);
@@ -20,7 +21,7 @@ const cloudinaryUploadImage =  async(fileToUpload) => {
       // console.log("data : ",data);
       return data;
     } catch (error) {
-      // console.log(error);
+      logger.error('Cloudinary upload failed', { error: error.message });
       throw new Error("Internal Server Error (cloudinary)",error);
     }
   };
@@ -32,7 +33,7 @@ const cloudinaryRemoveImage = async (imagePublicId) => {
       const result = await cloudinary.uploader.destroy(imagePublicId);
       return result;
     } catch (error) {
-      console.log(error);
+      logger.error('Cloudinary remove image failed', { error: error.message });
       throw new Error("Internal Server Error (cloudinary)");
     }
   };
@@ -40,11 +41,11 @@ const cloudinaryRemoveImage = async (imagePublicId) => {
   // Cloudinary Remove Multiple Image
 const cloudinaryRemoveMultipleImage = async (publicIds) => {
     try {
-      console.log(publicIds);
+      logger.debug('Removing multiple cloudinary images', { count: Array.isArray(publicIds) ? publicIds.length : 0 });
       const result = await cloudinary.api.delete_resources(publicIds)
       return result;
     } catch (error) {
-      console.log(error);
+      logger.error('Cloudinary remove multiple images failed', { error: error.message });
         throw new Error("Internal Server Error (cloudinary)");
     }
   };

@@ -1,5 +1,6 @@
 import {v2 as cloudinary} from 'cloudinary'
 import config from '../config.js';
+import logger from '../notification/services/logger.js';
 
 const ConnectCloudinary = async ()=>{
    try {
@@ -9,7 +10,7 @@ const ConnectCloudinary = async ()=>{
         api_secret: config.cloudinary.apiSecret,
     });
    } catch (error) {
-        console.log("ConnectCloudinary : ",error)
+       logger.error('ConnectCloudinary failed', { error: error.message });
    }
     
 }

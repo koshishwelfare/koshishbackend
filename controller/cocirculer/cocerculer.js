@@ -1,7 +1,7 @@
 import { v2 as cloudinary } from "cloudinary";
 import CocicularModel from "../../models/Cocirculer/cocerculerProfile.js";
+import logger from '../../notification/services/logger.js';
 const updatecocerculerprofile = async(req,res) => {
-    console.log("i am in update cocirculer controller");
     try {
       const {
         email,
@@ -43,14 +43,14 @@ const updatecocerculerprofile = async(req,res) => {
         about,
         address: address,
       };
-      console.log(cocircularData)
+      logger.debug('Updating co-curricular profile', { email });
     //   const newCocirculer = new CocicularModel(cocircularData);
     //   await newCocirculer.save();
     const update = await CocicularModel.findOneAndUpdate({email},cocircularData);
     if (update)  res.json({ success: true, meg: "love u Abhishek" });
     else res.json({ success: false, meg: "some error" });
     } catch (error) {
-      console.log(error);
+      logger.error('Failed to update co-curricular profile', { error: error.message });
   
       res.json({ success: false, msg: error.message, where: "i am update cocirculer" });
     }

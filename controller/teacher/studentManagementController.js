@@ -7,6 +7,7 @@ import { TestSubmission } from '../../models/App/testSubmissionSchema.js';
 import { generateTempPassword, generateUsernameFromName } from '../../utils/credentials.js';
 import { sendCredentialTemplateEmail } from '../../notification/index.js';
 import mongoose from 'mongoose';
+import logger from '../../notification/services/logger.js';
 
 const normalizeId = (value) => {
   const normalized = String(value || '').trim();
@@ -128,7 +129,7 @@ const addStudentByTeacher = async (req, res) => {
       }
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to add student by teacher', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -170,7 +171,7 @@ const recoverTeacherCredentialsByEmail = async (req, res) => {
       }
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to edit student by teacher', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -222,7 +223,7 @@ const recoverStudentCredentialsByEmail = async (req, res) => {
       }
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to list students by teacher', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -329,7 +330,7 @@ const listStudentsByTeacher = async (req, res) => {
       }
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch student by teacher', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -433,7 +434,7 @@ const getStudentPerformanceByTeacher = async (req, res) => {
       }
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to delete student by teacher', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };

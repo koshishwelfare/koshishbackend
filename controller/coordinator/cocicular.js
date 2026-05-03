@@ -3,6 +3,7 @@ import bycrypt from "bcrypt";
 import {cloudinaryUploadImage} from "../../middleware/cloudimage/cloudinary.js";
 import changeCocercular  from "../../repositories/coordinator/changeco-cercular.js";
 import CocicularModel from "../../models/Cocirculer/cocerculerProfile.js";
+import logger from '../../notification/services/logger.js';
 
 const buildCocircularPayload = ({ name, email, password, speciality, about, degree }) => ({
   name: String(name || "").trim(),
@@ -15,7 +16,6 @@ const buildCocircularPayload = ({ name, email, password, speciality, about, degr
 });
 
 const changecocirculer = async (req, res) => {
-  console.log("i am in change cocirculer controller", req.body, req.file);
   try {
     const { name, email, password, speciality, about, degree } = req.body;
     const imgfile = req.file;
@@ -87,7 +87,7 @@ const changecocirculer = async (req, res) => {
     
     res.json({ success: true, message: "Co-curricular profile updated successfully" });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to change co-curricular profile', { error: error.message });
 
     res.json({
       success: false,
@@ -121,7 +121,7 @@ const listCocircularUsers = async (req, res) => {
 
     return res.json({ success: true, ...data });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to list co-curricular users', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -141,7 +141,7 @@ const activateCocircularUser = async (req, res) => {
       user
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to activate co-curricular user', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -157,7 +157,7 @@ const deactivateCocircularUser = async (req, res) => {
 
     return res.json({ success: true, message: "Co-curricular deactivated successfully", user });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to deactivate co-curricular user', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };

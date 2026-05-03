@@ -5,6 +5,7 @@ import { MemberActivity } from '../../models/member/memberActivitySchema.js';
 import { Student } from '../../models/student/studentSchema.js';
 import mongoose from 'mongoose';
 import { sendHolidayNotificationEmail } from '../../notification/index.js';
+import logger from '../../notification/services/logger.js';
 
 const normalizeId = (value) => {
   if (!value) return '';
@@ -121,13 +122,13 @@ const notifyHolidayAudience = async ({ session, holiday, action = 'updated' }) =
       }
     };
 
-    console.info(
+    logger.info(
       `[HolidayNotify] session=${session._id} action=${action} holiday=${holiday.title} students(email ${summary.students.emailed}/${summary.students.total}) mentors(email ${summary.mentors.emailed}/${summary.mentors.total}, console ${summary.mentors.consoleNotified})`
     );
 
     return summary;
   } catch (error) {
-    console.log('[HolidayNotify] failed:', error.message);
+    logger.error('Holiday notification failed', { error: error.message });
     return {
       students: { total: 0, emailed: 0 },
       mentors: { total: 0, emailed: 0, consoleNotified: 0 },
@@ -179,7 +180,7 @@ const addAcademicSession = async (req, res) => {
 
     return res.json({ success: true, message: 'Session created successfully', data: session });
   } catch (error) {
-    console.log(error);
+      logger.error('Academic session creation error', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -189,7 +190,7 @@ const getAcademicSessions = async (req, res) => {
     const data = await AcademicSession.find({}).sort({ startYear: -1 });
     return res.json({ success: true, data, message: 'Sessions fetched successfully' });
   } catch (error) {
-    console.log(error);
+      logger.error('Fetching academic sessions error', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -205,7 +206,7 @@ const getAcademicSessionById = async (req, res) => {
 
     return res.json({ success: true, data, message: 'Session fetched successfully' });
   } catch (error) {
-    console.log(error);
+      logger.error('Fetching academic session by ID error', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -268,7 +269,7 @@ const updateAcademicSession = async (req, res) => {
     await session.save();
     return res.json({ success: true, data: session, message: 'Session updated successfully' });
   } catch (error) {
-    console.log(error);
+      logger.error('Updating academic session error', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -315,7 +316,7 @@ const listAcademicSessionHolidays = async (req, res) => {
       message: 'Holidays fetched successfully'
     });
   } catch (error) {
-    console.log(error);
+      logger.error('Listing academic session holidays error', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -372,7 +373,7 @@ const addAcademicSessionHoliday = async (req, res) => {
       message: `Holiday added successfully. Students emailed: ${notifySummary.students.emailed}/${notifySummary.students.total}, mentors emailed: ${notifySummary.mentors.emailed}/${notifySummary.mentors.total}.`
     });
   } catch (error) {
-    console.log(error);
+      logger.error('Adding academic session holiday error', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -433,7 +434,7 @@ const updateAcademicSessionHoliday = async (req, res) => {
       message: `Holiday updated successfully. Students emailed: ${notifySummary.students.emailed}/${notifySummary.students.total}, mentors emailed: ${notifySummary.mentors.emailed}/${notifySummary.mentors.total}.`
     });
   } catch (error) {
-    console.log(error);
+      logger.error('Updating academic session holiday error', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -478,7 +479,7 @@ const deleteAcademicSessionHoliday = async (req, res) => {
       message: `Holiday deleted successfully. Students emailed: ${notifySummary.students.emailed}/${notifySummary.students.total}, mentors emailed: ${notifySummary.mentors.emailed}/${notifySummary.mentors.total}.`
     });
   } catch (error) {
-    console.log(error);
+      logger.error('Deleting academic session holiday error', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -495,7 +496,7 @@ const getMentorsForClass = async (req, res) => {
 
     return res.json({ success: true, data: mentors, message: 'Mentors fetched successfully' });
   } catch (error) {
-    console.log(error);
+    logger.error('Academic controller error', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -575,7 +576,7 @@ const createClass = async (req, res) => {
 
     return res.json({ success: true, message: 'Class created successfully', data: classData });
   } catch (error) {
-    console.log(error);
+    logger.error('Academic controller error', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -594,7 +595,7 @@ const getClasses = async (req, res) => {
 
     return res.json({ success: true, data, message: 'Classes fetched successfully' });
   } catch (error) {
-    console.log(error);
+    logger.error('Academic controller error', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -614,7 +615,7 @@ const getClassById = async (req, res) => {
 
     return res.json({ success: true, data, message: 'Class fetched successfully' });
   } catch (error) {
-    console.log(error);
+    logger.error('Academic controller error', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -703,7 +704,7 @@ const updateClass = async (req, res) => {
     await classDoc.save();
     return res.json({ success: true, data: classDoc, message: 'Class updated successfully' });
   } catch (error) {
-    console.log(error);
+    logger.error('Academic controller error', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };

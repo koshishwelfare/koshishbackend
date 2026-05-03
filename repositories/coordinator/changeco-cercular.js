@@ -1,7 +1,8 @@
+import logger from '../../notification/services/logger.js';
 import CocicularModel from "../../models/Cocirculer/cocerculerProfile.js";
 
 const changeCocercular = async (cocircularData) => {
-    console.log("cocircularData",cocircularData);
+    logger.info('Updating co-curricular records');
     await CocicularModel.updateMany({isactive:true},{isactive:false})
     return await CocicularModel.create(cocircularData);
 }

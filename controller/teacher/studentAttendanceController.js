@@ -4,6 +4,7 @@ import { TeacherAttendance } from '../../models/teacher/teacherAttendanceSchema.
 import { Class } from '../../models/class/classSchema.js';
 import { DailyTeachingLog } from '../../models/teacher/dailyTeachingLogSchema.js';
 import mongoose from 'mongoose';
+import logger from '../../notification/services/logger.js';
 
 const isWorkingDay = (dateValue) => {
   const parsed = new Date(dateValue);
@@ -35,7 +36,7 @@ const getStudentsForAttendance = async (req, res) => {
 
     return res.json({ success: true, data: students, message: 'Students fetched successfully' });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch students for attendance', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -100,7 +101,7 @@ const markStudentAttendance = async (req, res) => {
 
     return res.json({ success: true, data: attendance, message: 'Attendance marked successfully' });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to mark student attendance', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -357,7 +358,7 @@ const listStudentAttendanceByTeacher = async (req, res) => {
       }
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to list student attendance by teacher', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };

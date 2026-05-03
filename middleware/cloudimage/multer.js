@@ -2,6 +2,7 @@ import multer from 'multer';
 import { fileURLToPath } from "url";
 import path from "path";
 import fs from "fs";
+import logger from '../../notification/services/logger.js';
 // Define __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,7 +24,7 @@ const storage = multer.diskStorage({
                 cb(null, false);
             }
         } catch (error) {
-            // console.log("filename multer : ", error);
+            logger.error('Multer filename generation failed', { error: error.message });
         }
      
     }
@@ -40,7 +41,7 @@ const  upload = multer({
             cb(new Error("Unsupported file format"), false);
         }
     } catch (error) {
-        console.log("fileFilter",error)
+        logger.error('Multer file filter failed', { error: error.message });
     }
     // console.log("  filefilter end")
 },

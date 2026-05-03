@@ -1,4 +1,5 @@
 import { ContactModel } from "../../models/contact.js";
+import logger from '../../notification/services/logger.js';
 const contactcontroller = async(req, res) => {
     try {
         // console.log(req.body)
@@ -15,7 +16,7 @@ const contactcontroller = async(req, res) => {
 
         return res.json({success:true , message: "We contact you as soon as possible" });
     } catch (error) {
-        console.log(error);
+        logger.error('Failed to create contact request', { error: error.message });
         return res.json({success: false, message: error.message})
     }
 }

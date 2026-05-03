@@ -1,4 +1,5 @@
 import { verifyAuthToken } from '../../utils/authToken.js';
+import logger from '../../notification/services/logger.js';
 
 const studentAuth = async (req, res, next) => {
   try {
@@ -22,7 +23,7 @@ const studentAuth = async (req, res, next) => {
     req.studentId = decoded.studentId;
     return next();
   } catch (error) {
-    console.log(error);
+    logger.error('Student auth middleware failed', { error: error.message });
     return res.json({ success: false, message: 'Session expired. Please login again' });
   }
 };

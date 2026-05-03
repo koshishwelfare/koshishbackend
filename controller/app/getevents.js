@@ -73,7 +73,7 @@ const getAllEvents = async(req,res) => {
          message: "get all homeEvent"
     });
  } catch (error) {
-    console.log(error)
+      logger.error('Failed to fetch events', { error: error.message });
    return res.json ({success:false, message:error.message});
  }
 
@@ -86,7 +86,7 @@ const getNewEvents = async(req,res) => {
          message: "get all New Event"
       });
    } catch (error) {
-      // console.log(error)
+        logger.error('Failed to fetch new events', { error: error.message });
       res.json ({success:false, message:error.message});
    }
   
@@ -99,7 +99,7 @@ const getNewEvents = async(req,res) => {
          message: "get all Past Event"
       });
    } catch (error) {
-      // console.log(error)
+        logger.error('Failed to fetch past events', { error: error.message });
       res.json ({success:false, message:error.message});
    }
   }
@@ -118,7 +118,7 @@ const getNewEvents = async(req,res) => {
          message: "get all Top Event"
       });
    } catch (error) {
-      // console.log(error)
+        logger.error('Failed to fetch top events', { error: error.message });
       res.json ({success:false, message:error.message});
    }
   }
@@ -129,7 +129,7 @@ const getNewEvents = async(req,res) => {
       // console.log(data);
       res.json({success:true, message:`found Event of id ${id}`, data:data})
    } catch (error) {
-      // console.log(error)
+        logger.error('Failed to fetch event by id', { error: error.message });
       res.json ({success:false, message:error.message});
    }
   }

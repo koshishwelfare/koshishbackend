@@ -1,4 +1,5 @@
 import { TestSeries } from '../../models/App/testSeriesSchema.js';
+import logger from '../../notification/services/logger.js';
 
 const addTestSeries = async (req, res) => {
   try {
@@ -30,7 +31,7 @@ const addTestSeries = async (req, res) => {
 
     return res.json({ success: true, message: 'Test series added successfully', data: test });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to add test series', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -40,7 +41,7 @@ const getAllTestSeriesForTeacher = async (req, res) => {
     const data = await TestSeries.find({}).sort({ createdAt: -1 });
     return res.json({ success: true, data, message: 'All test series found' });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch teacher test series', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };

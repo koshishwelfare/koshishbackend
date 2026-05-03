@@ -67,7 +67,7 @@ const getAllAnnouncement = async(req, res) => {
                 message: "find all data"
             });
     } catch (error) {
-        console.log(error);
+        logger.error('Failed to fetch announcements', { error: error.message });
         return res.json({success: false, message: error.message})
     }
 }
@@ -78,7 +78,7 @@ const getpastAnnouncement = async(req, res) => {
                 message: "find past data"
             });
     } catch (error) {
-        console.log(error);
+        logger.error('Failed to fetch past announcements', { error: error.message });
         return res.json({success: false, message: error.message})
     }
 }
@@ -89,7 +89,7 @@ const getmyAnnouncement = async(req, res)=>{
         const data = await Announcement.findById(id);
         return res.json({success: true, message: "find my data", data})
     } catch (error) {
-            console.log(error)
+            logger.error('Failed to fetch announcement by id', { error: error.message });
         return res.json({success: true, message: `find ${id}`})
     }
 }

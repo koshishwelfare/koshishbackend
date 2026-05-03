@@ -2,6 +2,7 @@ import { Assignment } from '../../models/class/assignmentSchema.js';
 import { AcademicSession } from '../../models/class/academicSessionSchema.js';
 import { Class } from '../../models/class/classSchema.js';
 import MemberModel from '../../models/member/MemberSchema.js';
+import logger from '../../notification/services/logger.js';
 
 const normalizeDeadline = (deadlineValue) => {
   const parsed = new Date(deadlineValue);
@@ -73,7 +74,7 @@ const createAssignment = async (req, res) => {
 
     return res.json({ success: true, message: 'Assignment created successfully', data: created });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to create assignment', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -103,7 +104,7 @@ const getTeacherAssignments = async (req, res) => {
 
     return res.json({ success: true, message: 'Assignments fetched successfully', data });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch teacher assignments', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -139,7 +140,7 @@ const updateTeacherAssignment = async (req, res) => {
 
     return res.json({ success: true, message: 'Assignment updated successfully', data: updated });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to update teacher assignment', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };

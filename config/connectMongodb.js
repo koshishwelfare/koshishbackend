@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import config from '../config.js';
 import { ensureDefaultPermissions } from '../utils/permissions.js';
+import logger from '../notification/services/logger.js';
 
 const cleanupLegacyMemberIndexes = async () => {
         try {
@@ -10,16 +11,16 @@ const cleanupLegacyMemberIndexes = async () => {
 
                 if (legacyClassTeacherIndex) {
                         await collection.dropIndex('classTeacher_1');
-                        console.log('Dropped legacy unique index: teachermodels.classTeacher_1');
+                        logger.info('Dropped legacy unique index', { index: 'teachermodels.classTeacher_1' });
                 }
         } catch (error) {
                 // Ignore cleanup failures to avoid blocking application startup.
-                console.log(`Index cleanup skipped: ${error.message}`);
+                logger.warn('Index cleanup skipped', { error: error.message });
         }
 };
 
 const ConnectDB = async ()=>{
-        mongoose.connection.on ('connected', ()=>console.log("Databse connected : "));
+        mongoose.connection.on ('connected', ()=>logger.info('Database connected'));
         await mongoose.connect(config.database.mongodbUri, {
                 dbName: config.database.dbName,
                 useNewUrlParser: true,

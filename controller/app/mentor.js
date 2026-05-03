@@ -1,6 +1,7 @@
 
 import MemberModel from "../../models/member/MemberSchema.js";
 import { buildListQuery } from "../utils/listQuery.js";
+import logger from '../../notification/services/logger.js';
 
 const memberProjection = {
   _id: 1,
@@ -71,7 +72,7 @@ const memberList =async (req,res) => {
     });
 
   } catch (error) {
-     console.log(error)
+      logger.error('Failed to list members', { error: error.message });
      res.json({success:false , message: error.message});
   }
 }
@@ -84,7 +85,7 @@ const coCircularMemberList = async (req, res) => {
       message: "Co-curricular member list found"
     });
   } catch (error) {
-    console.log(error)
+    logger.error('Failed to list co-curricular members', { error: error.message });
     res.json({success:false , message: error.message});
   }
 }
@@ -97,7 +98,7 @@ const collaboratorMemberList = async (req, res) => {
       message: "Collaborator list found"
     });
   } catch (error) {
-    console.log(error)
+    logger.error('Failed to list collaborators', { error: error.message });
     res.json({success:false , message: error.message});
   }
 }

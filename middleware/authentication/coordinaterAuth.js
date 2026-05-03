@@ -1,4 +1,5 @@
 import { verifyAuthToken } from '../../utils/authToken.js';
+import logger from '../../notification/services/logger.js';
 //  admin authentication middlewre
 const authCoodinater = async (req,res,next)=>{
       try{
@@ -20,7 +21,7 @@ const authCoodinater = async (req,res,next)=>{
             next();
       }
       catch(error){
-         console.log(error);
+        logger.error('Coordinator auth middleware failed', { error: error.message });
          return res.status(401).json({success: false, message: 'Session expired. Please login again'})
       }
 }

@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import validator from 'validator';
 import CocicularModel from '../../models/Cocirculer/cocerculerProfile.js';
+import logger from '../../notification/services/logger.js';
 import { sendCredentialTemplateEmail } from '../../notification/index.js';
 
 /**
@@ -95,7 +96,7 @@ const onboardCocircular = async (req, res) => {
           }
     });
   } catch (error) {
-    console.error('Onboard co-circular error:', error);
+    logger.error('Onboard co-circular error', { error: error.message });
     return res.json({
       success: false,
       message: error.message

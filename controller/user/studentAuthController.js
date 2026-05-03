@@ -4,6 +4,7 @@ import { Student } from '../../models/student/studentSchema.js';
 import { clearAuthCookie, setAuthCookie } from '../../config/authCookies.js';
 import { generateTempPassword } from '../../utils/credentials.js';
 import { sendAuthNotificationEmail, sendCredentialTemplateEmail } from '../../notification/index.js';
+import logger from '../../notification/services/logger.js';
 import { createStudentToken } from '../../utils/authToken.js';
 import { cloudinaryUploadImage } from '../../middleware/cloudimage/cloudinary.js';
 
@@ -92,7 +93,7 @@ const registerStudent = async (req, res) => {
       student: sanitizeStudent(student)
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Student registration failed', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -133,7 +134,7 @@ const loginStudent = async (req, res) => {
       student: sanitizeStudent(student)
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Student login failed', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -153,7 +154,7 @@ const getStudentProfile = async (req, res) => {
       student: sanitizeStudent(student)
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch student profile', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -193,7 +194,7 @@ const updateStudentProfile = async (req, res) => {
       student: sanitizeStudent(student)
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to update student profile', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -203,7 +204,7 @@ const logoutStudent = async (req, res) => {
     clearAuthCookie(res, 'studentToken');
     return res.json({ success: true, message: 'Logout successful' });
   } catch (error) {
-    console.log(error);
+    logger.error('Student logout failed', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -260,7 +261,7 @@ const recoverStudentCredentialsByEmail = async (req, res) => {
       }
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to recover student credentials', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };

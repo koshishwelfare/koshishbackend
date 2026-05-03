@@ -1,6 +1,6 @@
 import { homeEventsModel} from "../../models/Events/eventsSchema.js" 
 import { cloudinaryUploadImage,cloudinaryRemoveImage } from "../../middleware/cloudimage/cloudinary.js"
-import { logger } from "../../middleware/logger/logger.js"
+import logger from '../../notification/services/logger.js';
 
 const Addevent = async(req, res) => {
    try {
@@ -10,7 +10,7 @@ const Addevent = async(req, res) => {
        const thumbnail = req.file
       //  console.log(thumbnail)
        if (!eventName || !startdate || !desp ||!endDate) {
-            console.log(eventName, date, desp)
+            logger.debug('Creating event', { eventName, startdate, endDate });
             return res.json({success:false,message: "fill all filled the filled" })
        }
        if(isPrize){
@@ -42,7 +42,7 @@ const updateEvent = async(req, res)=>{
     // console.log("update Event", id)
     // console.log("i am update eventby id",req.body)
     const thumbnail = req.file
-    console.log(thumbnail)
+    logger.debug('Updating event thumbnail', { hasThumbnail: Boolean(thumbnail) });
     if (!eventName || !startdate || !desp ||!endDate) {
         //  console.log(eventName,imgurl, date, desp)
          return res.json({success:false,message: "fill all filled the filled" })

@@ -1,5 +1,6 @@
 import { Class } from '../../models/class/classSchema.js';
 import { TeacherAttendance } from '../../models/teacher/teacherAttendanceSchema.js';
+import logger from '../../notification/services/logger.js';
 
 const getMyClasses = async (req, res) => {
   try {
@@ -30,7 +31,7 @@ const getMyClasses = async (req, res) => {
 
     return res.json({ success: true, message: 'Teacher classes fetched successfully', data: fallbackClasses });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch teacher classes', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };

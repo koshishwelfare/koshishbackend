@@ -2,6 +2,7 @@ import { TestSeries } from '../../models/App/testSeriesSchema.js';
 import { TestSubmission } from '../../models/App/testSubmissionSchema.js';
 import { Student } from '../../models/student/studentSchema.js';
 import { StudentAttendance } from '../../models/student/studentAttendanceSchema.js';
+import logger from '../../notification/services/logger.js';
 
 const sanitizeTestForStudent = (test) => {
   return {
@@ -76,7 +77,7 @@ const listStudentTests = async (req, res) => {
       }
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to list student tests', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -92,7 +93,7 @@ const getStudentTestById = async (req, res) => {
 
     return res.json({ success: true, data: sanitizeTestForStudent(test) });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch student test by id', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -149,7 +150,7 @@ const submitStudentTest = async (req, res) => {
       }
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to submit student test', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -195,7 +196,7 @@ const getStudentAnswers = async (req, res) => {
       }
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch student answers', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -220,7 +221,7 @@ const getTestLeaderboard = async (req, res) => {
 
     return res.json({ success: true, data });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch test leaderboard', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -230,7 +231,7 @@ const getStudentAttendance = async (req, res) => {
     const attendance = await StudentAttendance.find({ studentId: req.studentId }).sort({ date: -1 });
     return res.json({ success: true, data: attendance });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch student attendance', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };

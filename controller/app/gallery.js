@@ -60,7 +60,7 @@ const getAllMemories = async (req, res) => {
       message: "All memories found"
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch memories', { error: error.message });
     res.json({ success: false, message: error.message });
   }
 };
@@ -72,7 +72,7 @@ const getAllNews = async (req, res) => {
       message: "All Newspaper found"
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch news galleries', { error: error.message });
     res.json({ success: false, message: error.message });
   }
 };
@@ -105,7 +105,7 @@ const getGalleryById = async (req, res) => {
     };
     res.json({ success: true, data: sendData, message: `gallery found ${id}` });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch gallery by id', { error: error.message });
     res.json({ success: false, message: error.message });
   }
 };

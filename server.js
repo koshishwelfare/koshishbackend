@@ -9,8 +9,11 @@ import coordinaterRoutes from './routes/coordinaterRoutes.js';
 import teacherRoutes from './routes/teacherRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import appRoutes from './routes/appRoutes.js';
+import healthRoutes from './routes/healthRoutes.js';
+import logger from './notification/services/logger.js';
 // app config
 const app = express();
+app.set('logger', logger);
 
 const normalizeCorsOrigin = (originConfig) => {
     if (originConfig === true || originConfig === false) return originConfig;
@@ -53,8 +56,9 @@ app.use('/api/user',userRoutes);
 app.use('/api/teacher',teacherRoutes)
 app.use('/api/cocirculer',coCirculerRoutes)
 app.use('/api/coordinater',coordinaterRoutes)
+app.use('/api/health', healthRoutes)
 // app.use('/api/upload/coordinater',coordinaterRoutes)
 app.get('/' ,   (req,res)=>{
     res.send('Api is working')
 });
-app.listen (port, ()=>console.log("server is started",port));
+app.listen(port, () => logger.info('server is started', { port }));

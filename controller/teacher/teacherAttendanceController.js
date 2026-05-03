@@ -2,6 +2,7 @@ import MemberModel from '../../models/member/MemberSchema.js';
 import { TeacherAttendance } from '../../models/teacher/teacherAttendanceSchema.js';
 import { Class } from '../../models/class/classSchema.js';
 import { buildTeacherAttendanceToken, isWorkingDay } from '../../utils/teacherAttendanceQr.js';
+import logger from '../../notification/services/logger.js';
 
 const toRadians = (value) => (value * Math.PI) / 180;
 
@@ -163,7 +164,7 @@ const markTeacherSelfAttendance = async (req, res) => {
       data: attendance
     });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to mark teacher attendance', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };
@@ -193,7 +194,7 @@ const getTeacherAttendance = async (req, res) => {
 
     return res.json({ success: true, message: 'Teacher attendance fetched successfully', data });
   } catch (error) {
-    console.log(error);
+    logger.error('Failed to fetch teacher attendance', { error: error.message });
     return res.json({ success: false, message: error.message });
   }
 };

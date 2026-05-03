@@ -2,6 +2,7 @@ import config from '../../config.js';
 import { setAuthCookie } from '../../config/authCookies.js';
 import { createRoleToken } from '../../utils/authToken.js';
 import { sendAuthNotificationEmail } from '../../notification/index.js';
+import logger from '../../notification/services/logger.js';
 
 import bcrypt from 'bcrypt';
 import MemberModel from '../../models/member/MemberSchema.js';
@@ -48,7 +49,7 @@ const loginTeacher = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Teacher login error:', error);
+    logger.error('Teacher login error', { error: error.message });
     return res.json({
       success: false,
       message: error.message
