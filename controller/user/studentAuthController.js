@@ -3,7 +3,7 @@ import validator from 'validator';
 import { Student } from '../../models/student/studentSchema.js';
 import { clearAuthCookie, setAuthCookie } from '../../config/authCookies.js';
 import { generateTempPassword } from '../../utils/credentials.js';
-import { sendAuthNotificationEmail, sendCredentialTemplateEmail } from '../../utils/mailer.js';
+import { sendAuthNotificationEmail, sendCredentialTemplateEmail } from '../../notification/index.js';
 import { createStudentToken } from '../../utils/authToken.js';
 import { cloudinaryUploadImage } from '../../middleware/cloudimage/cloudinary.js';
 

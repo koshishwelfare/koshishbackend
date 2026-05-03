@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import CocicularModel from '../../models/Cocirculer/cocerculerProfile.js';
 import { generateTempPassword } from '../../utils/credentials.js';
-import { sendCredentialTemplateEmail } from '../../utils/mailer.js';
+import { sendCredentialTemplateEmail } from '../../notification/index.js';
 
 const recoverCocirculerCredentialsByEmail = async (req, res) => {
   try {

@@ -4,7 +4,7 @@ import MemberModel from '../../models/member/MemberSchema.js';
 import { MemberActivity } from '../../models/member/memberActivitySchema.js';
 import { Student } from '../../models/student/studentSchema.js';
 import mongoose from 'mongoose';
-import { sendHolidayNotificationEmail } from '../../utils/mailer.js';
+import { sendHolidayNotificationEmail } from '../../notification/index.js';
 
 const normalizeId = (value) => {
   if (!value) return '';

@@ -3,7 +3,7 @@ import { addMentorDB, terminateMentorDB, AllMentorDB,CertifyMentorDB,updateMento
 import bcrypt from 'bcrypt';
 import MemberModel from '../../models/member/MemberSchema.js';
 import { generateTempPassword, generateUsernameFromName } from '../../utils/credentials.js';
-import { sendCredentialTemplateEmail } from '../../utils/mailer.js';
+import { sendCredentialTemplateEmail } from '../../notification/index.js';
 const addMentor = async(req, res ) => {
    try {
           const {name,email,isActive, isTop,classTeacher,linkedin,speciality,quote, aboutHead, about, role = 'mentor'}= req.body;

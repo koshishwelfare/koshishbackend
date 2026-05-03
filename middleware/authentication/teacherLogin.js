@@ -1,7 +1,7 @@
 import config from '../../config.js';
 import { setAuthCookie } from '../../config/authCookies.js';
 import { createRoleToken } from '../../utils/authToken.js';
-import { sendAuthNotificationEmail } from '../../utils/mailer.js';
+import { sendAuthNotificationEmail } from '../../notification/index.js';
 
 import bcrypt from 'bcrypt';
 import MemberModel from '../../models/member/MemberSchema.js';

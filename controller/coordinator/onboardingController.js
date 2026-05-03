@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import validator from 'validator';
 import CocicularModel from '../../models/Cocirculer/cocerculerProfile.js';
-import { sendCredentialTemplateEmail } from '../../utils/mailer.js';
+import { sendCredentialTemplateEmail } from '../../notification/index.js';
 
 /**
  * Onboard a new Co-Curricular user

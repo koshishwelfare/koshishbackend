@@ -5,7 +5,7 @@ import { Class } from '../../models/class/classSchema.js';
 import { StudentAttendance } from '../../models/student/studentAttendanceSchema.js';
 import { TestSubmission } from '../../models/App/testSubmissionSchema.js';
 import { generateTempPassword, generateUsernameFromName } from '../../utils/credentials.js';
-import { sendCredentialTemplateEmail } from '../../utils/mailer.js';
+import { sendCredentialTemplateEmail } from '../../notification/index.js';
 import mongoose from 'mongoose';
 
 const normalizeId = (value) => {
