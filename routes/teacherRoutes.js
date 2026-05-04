@@ -1,4 +1,5 @@
 import express from 'express'
+import asyncHandler from 'express-async-handler'
 import loginTeacher from '../middleware/authentication/teacherLogin.js';
 import authTeacher from '../middleware/authentication/teacherAuth.js';
 import upload from '../middleware/cloudimage/multer.js';
@@ -36,38 +37,38 @@ import requirePermission from '../middleware/authorization/requirePermission.js'
 const teacherRoutes = express.Router();
 
 teacherRoutes.post('/login', loginTeacher);
-teacherRoutes.post('/logout', logoutTeacher);
-teacherRoutes.get('/dashboard', authTeacher, getTeacherDashboard);
-teacherRoutes.get('/profile', authTeacher, getTeacherProfile);
-teacherRoutes.patch('/profile', authTeacher, upload.single('image'), updateTeacherProfile);
-teacherRoutes.patch('/profile/password', authTeacher, updateTeacherPassword);
-teacherRoutes.post('/test-series', authTeacher, addTestSeries);
-teacherRoutes.get('/test-series', authTeacher, getAllTestSeriesForTeacher);
-teacherRoutes.get('/students', authTeacher, getStudentsForAttendance);
-teacherRoutes.get('/students/list', authTeacher, listStudentsByTeacher);
-teacherRoutes.get('/students/performance/:studentId', authTeacher, getStudentPerformanceByTeacher);
-teacherRoutes.get('/classes/me', authTeacher, getMyClasses);
-teacherRoutes.get('/classes/:classId/curriculum', authTeacher, getClassCurriculum);
-teacherRoutes.post('/classes/:classId/subjects', authTeacher, addClassSubject);
-teacherRoutes.post('/classes/:classId/subjects/:subjectId/chapters', authTeacher, addClassChapter);
-teacherRoutes.patch('/classes/:classId/subjects/:subjectId/chapters/:chapterId/taught', authTeacher, markClassChapterTaught);
-teacherRoutes.get('/classes/:classId/students/available', authTeacher, listAvailableStudentsForClass);
-teacherRoutes.post('/classes/:classId/students/assign', authTeacher, assignStudentsToClass);
-teacherRoutes.post('/attendance/mark', authTeacher, markStudentAttendance);
-teacherRoutes.get('/attendance/student', authTeacher, listStudentAttendanceByTeacher);
-teacherRoutes.post('/attendance/teacher/self-mark', authTeacher, markTeacherSelfAttendance);
-teacherRoutes.get('/attendance/teacher', authTeacher, getTeacherAttendance);
-teacherRoutes.post('/daily-log', authTeacher, upsertDailyTeachingLog);
-teacherRoutes.get('/daily-log', authTeacher, getDailyTeachingLogs);
-teacherRoutes.post('/students/add', authTeacher, requirePermission('add_student'), addStudentByTeacher);
-teacherRoutes.post('/assignments', authTeacher, createAssignment);
-teacherRoutes.get('/assignments', authTeacher, getTeacherAssignments);
-teacherRoutes.patch('/assignments/:assignmentId', authTeacher, updateTeacherAssignment);
-teacherRoutes.post('/credentials/recover/teacher', recoverTeacherCredentialsByEmail);
-teacherRoutes.post('/credentials/recover/student', recoverStudentCredentialsByEmail);
-teacherRoutes.post('/follow/:teacherId', authTeacher, teacherFollowTeacher);
-teacherRoutes.delete('/follow/:teacherId', authTeacher, teacherUnfollowTeacher);
-teacherRoutes.get('/following', authTeacher, listTeacherFollowing);
-teacherRoutes.post('/profile/activity', authTeacher, teacherAddProfileActivity);
+teacherRoutes.post('/logout', asyncHandler(logoutTeacher));
+teacherRoutes.get('/dashboard', authTeacher, asyncHandler(getTeacherDashboard));
+teacherRoutes.get('/profile', authTeacher, asyncHandler(getTeacherProfile));
+teacherRoutes.patch('/profile', authTeacher, upload.single('image'), asyncHandler(updateTeacherProfile));
+teacherRoutes.patch('/profile/password', authTeacher, asyncHandler(updateTeacherPassword));
+teacherRoutes.post('/test-series', authTeacher, asyncHandler(addTestSeries));
+teacherRoutes.get('/test-series', authTeacher, asyncHandler(getAllTestSeriesForTeacher));
+teacherRoutes.get('/students', authTeacher, asyncHandler(getStudentsForAttendance));
+teacherRoutes.get('/students/list', authTeacher, asyncHandler(listStudentsByTeacher));
+teacherRoutes.get('/students/performance/:studentId', authTeacher, asyncHandler(getStudentPerformanceByTeacher));
+teacherRoutes.get('/classes/me', authTeacher, asyncHandler(getMyClasses));
+teacherRoutes.get('/classes/:classId/curriculum', authTeacher, asyncHandler(getClassCurriculum));
+teacherRoutes.post('/classes/:classId/subjects', authTeacher, asyncHandler(addClassSubject));
+teacherRoutes.post('/classes/:classId/subjects/:subjectId/chapters', authTeacher, asyncHandler(addClassChapter));
+teacherRoutes.patch('/classes/:classId/subjects/:subjectId/chapters/:chapterId/taught', authTeacher, asyncHandler(markClassChapterTaught));
+teacherRoutes.get('/classes/:classId/students/available', authTeacher, asyncHandler(listAvailableStudentsForClass));
+teacherRoutes.post('/classes/:classId/students/assign', authTeacher, asyncHandler(assignStudentsToClass));
+teacherRoutes.post('/attendance/mark', authTeacher, asyncHandler(markStudentAttendance));
+teacherRoutes.get('/attendance/student', authTeacher, asyncHandler(listStudentAttendanceByTeacher));
+teacherRoutes.post('/attendance/teacher/self-mark', authTeacher, asyncHandler(markTeacherSelfAttendance));
+teacherRoutes.get('/attendance/teacher', authTeacher, asyncHandler(getTeacherAttendance));
+teacherRoutes.post('/daily-log', authTeacher, asyncHandler(upsertDailyTeachingLog));
+teacherRoutes.get('/daily-log', authTeacher, asyncHandler(getDailyTeachingLogs));
+teacherRoutes.post('/students/add', authTeacher, requirePermission('add_student'), asyncHandler(addStudentByTeacher));
+teacherRoutes.post('/assignments', authTeacher, asyncHandler(createAssignment));
+teacherRoutes.get('/assignments', authTeacher, asyncHandler(getTeacherAssignments));
+teacherRoutes.patch('/assignments/:assignmentId', authTeacher, asyncHandler(updateTeacherAssignment));
+teacherRoutes.post('/credentials/recover/teacher', asyncHandler(recoverTeacherCredentialsByEmail));
+teacherRoutes.post('/credentials/recover/student', asyncHandler(recoverStudentCredentialsByEmail));
+teacherRoutes.post('/follow/:teacherId', authTeacher, asyncHandler(teacherFollowTeacher));
+teacherRoutes.delete('/follow/:teacherId', authTeacher, asyncHandler(teacherUnfollowTeacher));
+teacherRoutes.get('/following', authTeacher, asyncHandler(listTeacherFollowing));
+teacherRoutes.post('/profile/activity', authTeacher, asyncHandler(teacherAddProfileActivity));
 
 export default teacherRoutes

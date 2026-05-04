@@ -1,4 +1,5 @@
 import express from 'express';
+import asyncHandler from 'express-async-handler';
 import { checkEmailHealth } from '../notification/index.js';
 
 const router = express.Router();
@@ -17,18 +18,10 @@ const router = express.Router();
  * }
  * Status: 200 if connected, 503 if not
  */
-router.get('/email', async (req, res) => {
-  try {
-    const health = await checkEmailHealth();
-    const statusCode = health.connected ? 200 : 503;
-    res.status(statusCode).json(health);
-  } catch (error) {
-    res.status(500).json({
-      configured: false,
-      connected: false,
-      error: error.message,
-    });
-  }
-});
+router.get('/email', asyncHandler(async (req, res) => {
+  const health = await checkEmailHealth();
+  const statusCode = health.connected ? 200 : 503;
+  res.status(statusCode).json(health);
+}));
 
 export default router;
