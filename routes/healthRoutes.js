@@ -6,7 +6,16 @@ const router = express.Router();
 /**
  * Health check endpoint for email system
  * GET /health/email
- * Returns: { configured: boolean, connected: boolean, error?: string, queue?: object }
+ * Returns: { 
+ *   configured: boolean, 
+ *   connected: boolean, 
+ *   error?: string, 
+ *   queues?: { 
+ *     uptrash?: { enabled, accessible, messageCount, error? },
+ *     sqs?: { enabled, accessible, messageCount, error? }
+ *   }
+ * }
+ * Status: 200 if connected, 503 if not
  */
 router.get('/email', async (req, res) => {
   try {

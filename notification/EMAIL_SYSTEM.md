@@ -51,10 +51,11 @@ The email notification system has been enhanced with comprehensive logging, vali
 ```
 notification/
 ├── services/
-│   ├── mailer.js              # Enhanced email sender with retries, logging & queue fallback
+│   ├── mailer.js              # Enhanced email sender with retries, logging & multi-queue fallback
 │   ├── emailValidator.js      # Email validation utilities
 │   ├── logger.js              # Winston logger configuration
-│   └── sqsQueue.js            # Amazon SQS client for email jobs
+│   ├── uptrashQueue.js        # Uptrash queue client (REST JSON API)
+│   └── sqsQueue.js            # Amazon SQS client for email jobs (fallback)
 ├── templates/
 │   └── emailTemplates.js      # Email templates
 └── index.js                   # Main export file
@@ -70,9 +71,15 @@ SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-app-password
 SMTP_FROM=your-email@gmail.com
 
-# Optional Amazon SQS Queue
-EMAIL_QUEUE_ENABLED=true
-EMAIL_QUEUE_PROVIDER=sqs
+# Optional Uptrash Queue (PRIMARY QUEUE)
+EMAIL_QUEUE_UPTRASH_ENABLED=true
+UPTRASH_API_KEY=your-uptrash-api-key
+UPTRASH_BASE_URL=https://api.uptrash.io
+UPTRASH_QUEUE_NAME=email-queue
+UPTRASH_POLL_INTERVAL_MS=5000
+
+# Optional Amazon SQS Queue (SECONDARY/FALLBACK QUEUE)
+EMAIL_QUEUE_SQS_ENABLED=true
 AWS_REGION=ap-south-1
 EMAIL_QUEUE_URL=https://sqs.ap-south-1.amazonaws.com/123456789012/koshish-email-queue
 EMAIL_QUEUE_NAME=koshish-email-queue
@@ -245,21 +252,116 @@ console.log(result);
 | Debugging        | Difficult                      | ✅ Detailed logs & metrics                |
 | Response Detail  | `{ sent: true/false, reason }` | ✅ `{ sent, messageId, attempts, error }` |
 
-## Queue Mode
+## Multi-Queue System
+
+### Queue Priority
+
+The email system uses a **priority-based queue fallback strategy**:
+
+1. **Primary**: Uptrash (REST JSON API, simple & reliable)
+2. **Secondary**: Amazon SQS (AWS-native, if Uptrash fails)
+3. **Tertiary**: Direct SMTP (synchronous fallback, always available)
 
 ### How It Works
 
-1. `sendCredentialTemplateEmail()`, `sendAuthNotificationEmail()`, and `sendHolidayNotificationEmail()` build the email payload
-2. If `EMAIL_QUEUE_ENABLED=true`, the payload is published to SQS
-3. The worker process (`npm run email:worker`) reads the queue and sends the message via SMTP
-4. If SQS is unavailable, the mailer falls back to direct SMTP sending
+```
+Email Request
+    ↓
+Try Uptrash (if enabled)
+    ├─ Success → Job queued to Uptrash ✓
+    └─ Failure → Falls back to next queue
+       ↓
+    Try SQS (if enabled)
+       ├─ Success → Job queued to SQS ✓
+       └─ Failure → Falls back to next method
+          ↓
+       Send directly via SMTP (always available)
+```
+
+### Uptrash Worker
+
+Start the Uptrash queue worker (separate process):
+
+```bash
+npm run uptrash:worker
+```
+
+The worker will:
+
+- Long-poll Uptrash queue for new email jobs
+- Send each email via SMTP
+- Acknowledge messages after successful send
+- Leave failed messages on queue for retry by Uptrash timeout
+- Log all activity to `logs/email.log`
+
+Environment variables for worker:
+
+```bash
+UPTRASH_POLL_INTERVAL_MS=5000          # Polling frequency (ms)
+UPTRASH_MAX_MESSAGES_PER_BATCH=10      # Messages per poll
+EMAIL_QUEUE_UPTRASH_ENABLED=true       # Enable Uptrash worker
+UPTRASH_API_KEY=your-api-key           # Uptrash authentication
+UPTRASH_BASE_URL=https://api.uptrash.io
+UPTRASH_QUEUE_NAME=email-queue
+```
+
+### SQS Worker (Fallback)
+
+If you don't use Uptrash, start the SQS queue worker:
+
+```bash
+npm run email:worker
+```
+
+The worker behavior is identical to Uptrash worker but uses Amazon SQS.
 
 ### Worker Behavior
 
-- Long polls SQS for new email jobs
-- Deletes a message only after SMTP send succeeds
-- Leaves failed jobs on the queue so SQS can retry them
+- Long polls the queue for new email jobs
+- Deletes/acknowledges a message only after SMTP send succeeds
+- Leaves failed jobs on the queue for retry (by queue timeout/retry policy)
 - Logs all queue activity to `logs/email.log`
+- Graceful shutdown on SIGINT/SIGTERM (processes remaining messages)
+
+### Health Check Response
+
+```bash
+curl http://localhost:5000/api/health/email
+```
+
+Response with multi-queue system:
+
+```json
+{
+  "configured": true,
+  "connected": true,
+  "error": null,
+  "queues": {
+    "uptrash": {
+      "enabled": true,
+      "accessible": true,
+      "messageCount": 42,
+      "deadLetterCount": 0,
+      "retrying": 0
+    },
+    "sqs": {
+      "enabled": false,
+      "accessible": false,
+      "messageCount": 0
+    }
+  }
+}
+```
+
+### Optional: Legacy SQS-Only Queue
+
+For backward compatibility, if Uptrash is disabled, the system falls back to SQS (if enabled).
+
+To use only SQS:
+
+- Set `EMAIL_QUEUE_UPTRASH_ENABLED=false`
+- Set `EMAIL_QUEUE_SQS_ENABLED=true`
+- Run `npm run email:worker` (SQS worker)
 
 ## Future Enhancements
 

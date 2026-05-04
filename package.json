@@ -8,7 +8,8 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "db:sync-student-indexes": "node scripts/syncStudentIndexes.js",
-    "email:worker": "node scripts/emailQueueWorker.js"
+    "email:worker": "node scripts/emailQueueWorker.js",
+    "uptrash:worker": "node scripts/uptrashQueueWorker.js"
   },
   "author": "",
   "license": "ISC",

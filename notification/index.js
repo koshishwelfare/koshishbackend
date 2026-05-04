@@ -8,6 +8,7 @@ export {
   sendMailWithRetry as sendMailDirect,
 } from './services/mailer.js';
 
+// SQS Queue exports
 export {
   enqueueEmailJob,
   receiveEmailJobs,
@@ -16,7 +17,17 @@ export {
   getEmailQueueHealth,
   isQueueEnabled,
   isQueueConfigured,
+  isSqsEnabled,
 } from './services/sqsQueue.js';
+
+// Uptrash Queue exports
+export {
+  enqueueToUptrash,
+  receiveFromUptrash,
+  acknowledgeUptrashMessage,
+  getUptrashHealth,
+  isUptrashEnabled,
+} from './services/uptrashQueue.js';
 
 export { validateEmailParams, validateRecipients, isValidEmail } from './services/emailValidator.js';
 export { default as notificationLogger } from './services/logger.js';

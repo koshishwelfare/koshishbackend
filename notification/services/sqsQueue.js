@@ -14,37 +14,53 @@ const safe = (value) => String(value || '').trim();
 
 const getQueueConfig = () => config.email?.queue || {};
 
+const isSqsEnabled = () => {
+  const queueConfig = getQueueConfig();
+  return Boolean(
+    queueConfig.sqs?.enabled &&
+      safe(queueConfig.sqs.region) &&
+      (safe(queueConfig.sqs.queueUrl) || safe(queueConfig.sqs.queueName)) &&
+      safe(queueConfig.sqs.accessKeyId) &&
+      safe(queueConfig.sqs.secretAccessKey)
+  );
+};
+
 const isQueueEnabled = () => Boolean(getQueueConfig().enabled);
 
 const isQueueConfigured = () => {
   const queueConfig = getQueueConfig();
-  const region = safe(queueConfig.region);
-  const queueUrl = safe(queueConfig.queueUrl);
-  const queueName = safe(queueConfig.queueName);
-  const accessKeyId = safe(queueConfig.accessKeyId);
-  const secretAccessKey = safe(queueConfig.secretAccessKey);
+  const sqsConfig = queueConfig.sqs || {};
+  const region = safe(sqsConfig.region);
+  const queueUrl = safe(sqsConfig.queueUrl);
+  const queueName = safe(sqsConfig.queueName);
+  const accessKeyId = safe(sqsConfig.accessKeyId);
+  const secretAccessKey = safe(sqsConfig.secretAccessKey);
 
-  return Boolean(isQueueEnabled() && region && (queueUrl || queueName) && accessKeyId && secretAccessKey);
+  return Boolean(isSqsEnabled() && region && (queueUrl || queueName) && accessKeyId && secretAccessKey);
 };
 
 const getBaseEndpoint = () => {
   const queueConfig = getQueueConfig();
-  const endpoint = safe(queueConfig.endpoint);
+  const sqsConfig = queueConfig.sqs || {};
+  const endpoint = safe(sqsConfig.endpoint);
   if (endpoint) {
     return new URL(endpoint);
   }
 
-  const region = safe(queueConfig.region) || 'us-east-1';
+  const region = safe(sqsConfig.region) || 'us-east-1';
   return new URL(`https://sqs.${region}.amazonaws.com`);
 };
 
-const getQueueRegion = () => safe(getQueueConfig().region) || 'us-east-1';
+const getQueueRegion = () => safe(getQueueConfig().sqs?.region) || 'us-east-1';
 
-const getCredentials = () => ({
-  accessKeyId: safe(getQueueConfig().accessKeyId),
-  secretAccessKey: safe(getQueueConfig().secretAccessKey),
-  sessionToken: safe(getQueueConfig().sessionToken),
-});
+const getCredentials = () => {
+  const sqsConfig = getQueueConfig().sqs || {};
+  return {
+    accessKeyId: safe(sqsConfig.accessKeyId),
+    secretAccessKey: safe(sqsConfig.secretAccessKey),
+    sessionToken: safe(sqsConfig.sessionToken),
+  };
+};
 
 const sha256Hex = (value) => crypto.createHash('sha256').update(value).digest('hex');
 
@@ -246,17 +262,18 @@ const invokeAction = async ({ action, params = {}, queueUrl, useQueueUrl = false
 
 const resolveQueueUrl = async () => {
   const queueConfig = getQueueConfig();
+  const sqsConfig = queueConfig.sqs || {};
   if (resolvedQueueUrlCache) {
     return resolvedQueueUrlCache;
   }
 
-  const directQueueUrl = safe(queueConfig.queueUrl);
+  const directQueueUrl = safe(sqsConfig.queueUrl);
   if (directQueueUrl) {
     resolvedQueueUrlCache = directQueueUrl;
     return resolvedQueueUrlCache;
   }
 
-  const queueName = safe(queueConfig.queueName);
+  const queueName = safe(sqsConfig.queueName);
   if (!queueName) {
     throw new Error('Email queue name or URL is required');
   }
@@ -323,13 +340,14 @@ const receiveEmailJobs = async () => {
   }
 
   const queueConfig = getQueueConfig();
+  const sqsConfig = queueConfig.sqs || {};
   const queueUrl = await resolveQueueUrl();
   const xml = await invokeAction({
     action: 'ReceiveMessage',
     params: {
-      MaxNumberOfMessages: queueConfig.maxMessages || 10,
-      WaitTimeSeconds: queueConfig.waitTimeSeconds || 20,
-      VisibilityTimeout: queueConfig.visibilityTimeout || 60,
+      MaxNumberOfMessages: sqsConfig.maxMessages || 10,
+      WaitTimeSeconds: sqsConfig.waitTimeSeconds || 20,
+      VisibilityTimeout: sqsConfig.visibilityTimeout || 60,
       AttributeName: ['All'],
       MessageAttributeName: ['All'],
     },
@@ -362,13 +380,14 @@ const deleteEmailJob = async (receiptHandle) => {
 const getEmailQueueHealth = async () => {
   const queueEnabled = isQueueEnabled();
   const queueConfigured = isQueueConfigured();
+  const sqsConfig = getQueueConfig().sqs || {};
 
   if (!queueEnabled) {
     return {
       enabled: false,
       configured: queueConfigured,
       connected: false,
-      queueUrl: safe(getQueueConfig().queueUrl) || resolvedQueueUrlCache || '',
+      queueUrl: safe(sqsConfig.queueUrl) || resolvedQueueUrlCache || '',
       mode: 'disabled',
       error: null,
     };
@@ -379,7 +398,7 @@ const getEmailQueueHealth = async () => {
       enabled: true,
       configured: false,
       connected: false,
-      queueUrl: safe(getQueueConfig().queueUrl) || resolvedQueueUrlCache || '',
+      queueUrl: safe(sqsConfig.queueUrl) || resolvedQueueUrlCache || '',
       mode: 'misconfigured',
       error: 'Email queue configuration is incomplete',
     };
@@ -421,4 +440,5 @@ export {
   getEmailQueueHealth,
   isQueueEnabled,
   isQueueConfigured,
+  isSqsEnabled,
 };

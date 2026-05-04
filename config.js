@@ -51,19 +51,34 @@ const config = {
       from: smtpFrom,
     },
     queue: {
-      enabled: String(process.env.EMAIL_QUEUE_ENABLED || '').trim().toLowerCase() === 'true',
+      // Uptrash Configuration (PRIMARY QUEUE)
+      uptrash: {
+        enabled: String(process.env.EMAIL_QUEUE_UPTRASH_ENABLED || '').trim().toLowerCase() === 'true',
+        apiKey: String(process.env.UPTRASH_API_KEY || '').trim(),
+        baseUrl: String(process.env.UPTRASH_BASE_URL || 'https://api.uptrash.io').trim(),
+        queueName: String(process.env.UPTRASH_QUEUE_NAME || 'email-queue').trim(),
+        pollIntervalMs: parseInt(process.env.UPTRASH_POLL_INTERVAL_MS, 10) || 5000,
+      },
+      // SQS Configuration (SECONDARY/FALLBACK QUEUE)
+      sqs: {
+        enabled: String(process.env.EMAIL_QUEUE_SQS_ENABLED || '').trim().toLowerCase() === 'true',
+        region: String(process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || '').trim(),
+        queueUrl: String(process.env.EMAIL_QUEUE_URL || '').trim(),
+        queueName: String(process.env.EMAIL_QUEUE_NAME || '').trim(),
+        endpoint: String(process.env.AWS_SQS_ENDPOINT || '').trim(),
+        accessKeyId: String(process.env.AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY || '').trim(),
+        secretAccessKey: String(process.env.AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_KEY || '').trim(),
+        sessionToken: String(process.env.AWS_SESSION_TOKEN || '').trim(),
+        waitTimeSeconds: parseInt(process.env.EMAIL_QUEUE_WAIT_TIME_SECONDS, 10) || 20,
+        visibilityTimeout: parseInt(process.env.EMAIL_QUEUE_VISIBILITY_TIMEOUT, 10) || 60,
+        maxMessages: parseInt(process.env.EMAIL_QUEUE_MAX_MESSAGES, 10) || 10,
+        pollDelayMs: parseInt(process.env.EMAIL_QUEUE_POLL_DELAY_MS, 10) || 5000,
+      },
+      // Legacy support - check if any queue is enabled
+      enabled: String(process.env.EMAIL_QUEUE_ENABLED || '').trim().toLowerCase() === 'true' ||
+               String(process.env.EMAIL_QUEUE_UPTRASH_ENABLED || '').trim().toLowerCase() === 'true' ||
+               String(process.env.EMAIL_QUEUE_SQS_ENABLED || '').trim().toLowerCase() === 'true',
       provider: String(process.env.EMAIL_QUEUE_PROVIDER || 'none').trim().toLowerCase(),
-      region: String(process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || '').trim(),
-      queueUrl: String(process.env.EMAIL_QUEUE_URL || '').trim(),
-      queueName: String(process.env.EMAIL_QUEUE_NAME || '').trim(),
-      endpoint: String(process.env.AWS_SQS_ENDPOINT || '').trim(),
-      accessKeyId: String(process.env.AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY || '').trim(),
-      secretAccessKey: String(process.env.AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_KEY || '').trim(),
-      sessionToken: String(process.env.AWS_SESSION_TOKEN || '').trim(),
-      waitTimeSeconds: parseInt(process.env.EMAIL_QUEUE_WAIT_TIME_SECONDS, 10) || 20,
-      visibilityTimeout: parseInt(process.env.EMAIL_QUEUE_VISIBILITY_TIMEOUT, 10) || 60,
-      maxMessages: parseInt(process.env.EMAIL_QUEUE_MAX_MESSAGES, 10) || 10,
-      pollDelayMs: parseInt(process.env.EMAIL_QUEUE_POLL_DELAY_MS, 10) || 5000,
     },
     isConfigured: Boolean(smtpHost && smtpPort && smtpUser && smtpPass),
   },

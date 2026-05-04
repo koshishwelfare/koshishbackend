@@ -2,7 +2,8 @@ import nodemailer from 'nodemailer';
 import config from '../../config.js';
 import logger from './logger.js';
 import { validateEmailParams, sanitizeEmail } from './emailValidator.js';
-import { enqueueEmailJob, getEmailQueueHealth, isQueueEnabled } from './sqsQueue.js';
+import { enqueueEmailJob, getEmailQueueHealth, isQueueEnabled, isSqsEnabled } from './sqsQueue.js';
+import { enqueueToUptrash, isUptrashEnabled, getUptrashHealth } from './uptrashQueue.js';
 import { authEventTemplate, credentialsTemplate, holidayEventTemplate } from '../templates/emailTemplates.js';
 
 const safe = (value) => String(value || '').trim();
@@ -174,7 +175,43 @@ const sendMailWithRetry = async (
 const queueOrSendMail = async ({ to, subject, text, html }, queueMeta = {}) => {
   const payload = { to, subject, text, html };
 
-  if (isQueueEnabled()) {
+  // TRY UPTRASH FIRST (PRIMARY QUEUE)
+  if (isUptrashEnabled()) {
+    try {
+      const queueResult = await enqueueToUptrash({
+        type: queueMeta.type || 'email',
+        payload,
+        meta: queueMeta,
+      });
+
+      logger.info('Email queued for Uptrash delivery', {
+        to,
+        subject,
+        messageId: queueResult.messageId,
+        queueName: queueResult.queueName,
+        type: queueMeta.type || 'email',
+      });
+
+      return {
+        sent: true,
+        queued: true,
+        queueProvider: 'uptrash',
+        messageId: queueResult.messageId,
+        attempts: 0,
+      };
+    } catch (error) {
+      logger.warn('Email queue enqueue failed on Uptrash, trying SQS fallback', {
+        to,
+        subject,
+        error: error.message,
+        code: error.code,
+        type: queueMeta.type || 'email',
+      });
+    }
+  }
+
+  // TRY SQS SECOND (SECONDARY QUEUE)
+  if (isSqsEnabled()) {
     try {
       const queueResult = await enqueueEmailJob({
         type: queueMeta.type || 'email',
@@ -193,12 +230,13 @@ const queueOrSendMail = async ({ to, subject, text, html }, queueMeta = {}) => {
       return {
         sent: true,
         queued: true,
+        queueProvider: 'sqs',
         messageId: queueResult.messageId,
         queueUrl: queueResult.queueUrl,
         attempts: 0,
       };
     } catch (error) {
-      logger.warn('Email queue enqueue failed, falling back to SMTP', {
+      logger.warn('Email queue enqueue failed on SQS, falling back to SMTP', {
         to,
         subject,
         error: error.message,
@@ -208,6 +246,7 @@ const queueOrSendMail = async ({ to, subject, text, html }, queueMeta = {}) => {
     }
   }
 
+  // FALLBACK TO DIRECT SMTP SEND (TERTIARY/FINAL)
   return await sendMailWithRetry(payload);
 };
 
@@ -326,13 +365,25 @@ const checkEmailHealth = async () => {
     }
   }
 
-  const queue = await getEmailQueueHealth();
+  // Get queue health for both Uptrash and SQS
+  const [uptrashHealth, sqsHealth] = await Promise.all([
+    getUptrashHealth().catch(err => ({ enabled: false, error: err.message })),
+    getEmailQueueHealth().catch(err => ({ enabled: false, error: err.message })),
+  ]);
+
+  const queues = {};
+  if (uptrashHealth.enabled !== false) {
+    queues.uptrash = uptrashHealth;
+  }
+  if (sqsHealth.enabled !== false) {
+    queues.sqs = sqsHealth;
+  }
 
   return {
     configured: config_valid,
-    connected: connection_ok && (!queue.enabled || queue.connected),
+    connected: connection_ok,
     error: error || null,
-    queue,
+    queues: queues || {},
   };
 };
 
