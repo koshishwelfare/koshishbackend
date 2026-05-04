@@ -67,12 +67,11 @@ const initializeServices = async () => {
 
     logger.info('All services initialized successfully');
     console.log('[INFO] All services initialized successfully');
+    return true;
   } catch (error) {
     console.error('[FATAL] Service initialization failed:', error);
     logger.error('Service initialization failed', { error: error.message, stack: error.stack });
-    // Wait for logs to flush before exit
-    setTimeout(() => process.exit(1), 500);
-    throw error; // Also re-throw in case the timeout is the only exit mechanism
+    return false;
   }
 };
 
@@ -103,11 +102,14 @@ app.get('/' ,   (req,res)=>{
 
 // Start server only after services are initialized
 const startServer = async () => {
-  await initializeServices();
+  const servicesReady = await initializeServices();
   
   app.listen(port, () => {
     console.log(`[SUCCESS] Server running on port ${port}`);
     logger.info('server is started', { port });
+    if (!servicesReady) {
+      logger.warn('Server started with incomplete service initialization');
+    }
   });
 };
 
@@ -115,7 +117,7 @@ const startServer = async () => {
 startServer().catch((error) => {
   console.error('[FATAL] Failed to start server:', error);
   logger.error('Failed to start server', { error: error.message, stack: error.stack });
-  // Wait for logs to flush before exit
+  // Keep the process alive only for unexpected startup failures outside service initialization.
   setTimeout(() => process.exit(1), 500);
 });
 

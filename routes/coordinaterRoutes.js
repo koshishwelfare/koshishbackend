@@ -1,5 +1,4 @@
 import express from 'express'
-const coordinaterRoutes = express.Router();
 import asyncHandler from 'express-async-handler'
 import loginCoordinater from '../middleware/authentication/coordinatorLogin.js';
 import authCoodinater from '../middleware/authentication/coordinaterAuth.js';
@@ -24,6 +23,9 @@ import {
 	getTeacherProfileByIdForCoordinator,
 	getStudentProfileByIdForCoordinator
 } from '../controller/coordinator/userDirectoryController.js';
+
+const coordinaterRoutes = express.Router();
+
 coordinaterRoutes.post('/login', loginCoordinater);
 coordinaterRoutes.post('/logout', asyncHandler(logoutCoordinator));
 // coordinaterRoutes.get('/auth', authCoodinater);
