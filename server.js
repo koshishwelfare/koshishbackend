@@ -16,13 +16,15 @@ import logger from './notification/services/logger.js';
 process.on('uncaughtException', (error) => {
   console.error('[FATAL] Uncaught Exception:', error);
   logger.error('Uncaught Exception', { error: error.message, stack: error.stack });
-  process.exit(1);
+  // Ensure logs are flushed before exit
+  setTimeout(() => process.exit(1), 500);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
   console.error('[FATAL] Unhandled Rejection:', reason);
   logger.error('Unhandled Rejection', { reason: String(reason), promise: String(promise) });
-  process.exit(1);
+  // Ensure logs are flushed before exit
+  setTimeout(() => process.exit(1), 500);
 });
 
 // app config
@@ -68,7 +70,9 @@ const initializeServices = async () => {
   } catch (error) {
     console.error('[FATAL] Service initialization failed:', error);
     logger.error('Service initialization failed', { error: error.message, stack: error.stack });
-    process.exit(1);
+    // Wait for logs to flush before exit
+    setTimeout(() => process.exit(1), 500);
+    throw error; // Also re-throw in case the timeout is the only exit mechanism
   }
 };
 
@@ -107,4 +111,18 @@ const startServer = async () => {
   });
 };
 
-startServer();
+// Handle errors from the async startServer function
+startServer().catch((error) => {
+  console.error('[FATAL] Failed to start server:', error);
+  logger.error('Failed to start server', { error: error.message, stack: error.stack });
+  // Wait for logs to flush before exit
+  setTimeout(() => process.exit(1), 500);
+});
+
+// Additional safeguard: catch any stderr output that might be missed
+if (process.stderr && typeof process.stderr.on === 'function') {
+  process.stderr.on('error', (error) => {
+    console.error('[STDERR ERROR]', error);
+    process.exit(1);
+  });
+}
