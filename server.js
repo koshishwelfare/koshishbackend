@@ -53,26 +53,46 @@ const normalizeCorsOrigin = (originConfig) => {
 
 // Initialize services (database and cloudinary) before starting server
 const initializeServices = async () => {
-  try {
-    console.log('[INFO] Initializing services...');
-    logger.info('Starting service initialization');
+  console.log('[INFO] Initializing services...');
+  logger.info('Starting service initialization');
 
-    console.log('[INFO] Connecting to database...');
-    await ConnectDB();
+  const results = await Promise.allSettled([
+    ConnectDB(),
+    ConnectCloudinary(),
+  ]);
+
+  const [databaseResult, cloudinaryResult] = results;
+  const failedServices = [];
+
+  if (databaseResult.status === 'fulfilled') {
     console.log('[INFO] Database connection successful');
+  } else {
+    failedServices.push('database');
+    logger.error('Database initialization failed', {
+      error: databaseResult.reason?.message || String(databaseResult.reason),
+    });
+  }
 
-    console.log('[INFO] Configuring Cloudinary...');
-    await ConnectCloudinary();
+  if (cloudinaryResult.status === 'fulfilled') {
     console.log('[INFO] Cloudinary configured successfully');
+  } else {
+    failedServices.push('cloudinary');
+    logger.error('Cloudinary initialization failed', {
+      error: cloudinaryResult.reason?.message || String(cloudinaryResult.reason),
+    });
+  }
 
+  if (failedServices.length === 0) {
     logger.info('All services initialized successfully');
     console.log('[INFO] All services initialized successfully');
     return true;
-  } catch (error) {
-    console.error('[FATAL] Service initialization failed:', error);
-    logger.error('Service initialization failed', { error: error.message, stack: error.stack });
-    return false;
   }
+
+  logger.warn('Service initialization completed with failures', {
+    failedServices,
+  });
+  console.warn('[WARN] Service initialization completed with failures:', failedServices.join(', '));
+  return false;
 };
 
 const port = config.server.port
@@ -102,14 +122,17 @@ app.get('/' ,   (req,res)=>{
 
 // Start server only after services are initialized
 const startServer = async () => {
-  const servicesReady = await initializeServices();
-  
   app.listen(port, () => {
     console.log(`[SUCCESS] Server running on port ${port}`);
     logger.info('server is started', { port });
-    if (!servicesReady) {
-      logger.warn('Server started with incomplete service initialization');
-    }
+  });
+
+  void initializeServices().catch((error) => {
+    console.error('[FATAL] Failed during background service initialization:', error);
+    logger.error('Background service initialization failed', {
+      error: error.message,
+      stack: error.stack,
+    });
   });
 };
 
