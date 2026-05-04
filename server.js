@@ -11,6 +11,20 @@ import userRoutes from './routes/userRoutes.js';
 import appRoutes from './routes/appRoutes.js';
 import healthRoutes from './routes/healthRoutes.js';
 import logger from './notification/services/logger.js';
+
+// Global error handlers - log errors before process exits
+process.on('uncaughtException', (error) => {
+  console.error('[FATAL] Uncaught Exception:', error);
+  logger.error('Uncaught Exception', { error: error.message, stack: error.stack });
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[FATAL] Unhandled Rejection:', reason);
+  logger.error('Unhandled Rejection', { reason: String(reason), promise: String(promise) });
+  process.exit(1);
+});
+
 // app config
 const app = express();
 app.set('logger', logger);
@@ -35,8 +49,29 @@ const normalizeCorsOrigin = (originConfig) => {
     return value;
 };
 
-ConnectDB()
-ConnectCloudinary()
+// Initialize services (database and cloudinary) before starting server
+const initializeServices = async () => {
+  try {
+    console.log('[INFO] Initializing services...');
+    logger.info('Starting service initialization');
+
+    console.log('[INFO] Connecting to database...');
+    await ConnectDB();
+    console.log('[INFO] Database connection successful');
+
+    console.log('[INFO] Configuring Cloudinary...');
+    await ConnectCloudinary();
+    console.log('[INFO] Cloudinary configured successfully');
+
+    logger.info('All services initialized successfully');
+    console.log('[INFO] All services initialized successfully');
+  } catch (error) {
+    console.error('[FATAL] Service initialization failed:', error);
+    logger.error('Service initialization failed', { error: error.message, stack: error.stack });
+    process.exit(1);
+  }
+};
+
 const port = config.server.port
 const corsOrigin = normalizeCorsOrigin(config.cors.origin);
 
@@ -61,4 +96,15 @@ app.use('/api/health', healthRoutes)
 app.get('/' ,   (req,res)=>{
     res.send('Api is working')
 });
-app.listen(port, () => logger.info('server is started', { port }));
+
+// Start server only after services are initialized
+const startServer = async () => {
+  await initializeServices();
+  
+  app.listen(port, () => {
+    console.log(`[SUCCESS] Server running on port ${port}`);
+    logger.info('server is started', { port });
+  });
+};
+
+startServer();

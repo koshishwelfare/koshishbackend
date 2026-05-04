@@ -20,13 +20,49 @@ const cleanupLegacyMemberIndexes = async () => {
 };
 
 const ConnectDB = async ()=>{
-        mongoose.connection.on ('connected', ()=>logger.info('Database connected'));
-        await mongoose.connect(config.database.mongodbUri, {
-                dbName: config.database.dbName,
-                useNewUrlParser: true,
-      useUnifiedTopology: true,
-        })
-        await cleanupLegacyMemberIndexes();
-        await ensureDefaultPermissions();
-}
+        try {
+                // Set up connection event listeners
+                mongoose.connection.on ('connected', ()=>{
+                        console.log('[DB] MongoDB connection established');
+                        logger.info('Database connected');
+                });
+                
+                mongoose.connection.on('error', (error) => {
+                        console.error('[DB ERROR] MongoDB connection error:', error);
+                        logger.error('Database connection error', { error: error.message });
+                });
+
+                // Connect to MongoDB
+                console.log('[DB] Attempting to connect to MongoDB...');
+                logger.info('Connecting to MongoDB', { uri: config.database.mongodbUri });
+                
+                await mongoose.connect(config.database.mongodbUri, {
+                        dbName: config.database.dbName,
+                        useNewUrlParser: true,
+                        useUnifiedTopology: true,
+                });
+
+                console.log('[DB] MongoDB connected successfully');
+                logger.info('MongoDB connection successful');
+
+                // Cleanup legacy indexes
+                console.log('[DB] Running index cleanup...');
+                await cleanupLegacyMemberIndexes();
+
+                // Ensure default permissions
+                console.log('[DB] Ensuring default permissions...');
+                await ensureDefaultPermissions();
+                
+                console.log('[DB] Database initialization complete');
+                logger.info('Database initialization complete');
+        } catch (error) {
+                console.error('[FATAL] Failed to connect to database:', error);
+                logger.error('Database connection failed', { 
+                        error: error.message, 
+                        stack: error.stack,
+                        mongoUri: config.database.mongodbUri 
+                });
+                throw error; // Re-throw to be caught by server.js
+        }
+};
 export default ConnectDB
