@@ -6,9 +6,7 @@
 
 import https from 'https';
 import config from '../../config.js';
-import { notificationLogger } from './logger.js';
-
-const logger = notificationLogger;
+import logger from './logger.js';
 
 /**
  * Make HTTPS request to Uptrash API
