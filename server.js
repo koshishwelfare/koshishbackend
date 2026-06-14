@@ -110,12 +110,12 @@ app.use(express.json());
 // Parse URL-encoded bodies (HTML forms)
 app.use(express.urlencoded({ extended: true }));
 //  APIs endpoints
-app.use('/api/app',appRoutes);
-app.use('/api/user',userRoutes);
-app.use('/api/teacher',teacherRoutes)
-app.use('/api/cocirculer',coCirculerRoutes)
-app.use('/api/coordinater',coordinaterRoutes)
-app.use('/api/health', healthRoutes)
+// app.use('/api/app',appRoutes);
+// app.use('/api/user',userRoutes);
+// app.use('/api/teacher',teacherRoutes)
+// app.use('/api/cocirculer',coCirculerRoutes)
+// app.use('/api/coordinater',coordinaterRoutes)
+// app.use('/api/health', healthRoutes)
 // app.use('/api/upload/coordinater',coordinaterRoutes)
 app.get('/' ,   (req,res)=>{
     res.send('Api is working')
