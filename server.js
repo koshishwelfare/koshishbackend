@@ -225,14 +225,14 @@ const initializeServices = async () => {
 
 const startServer = async () => {
   try {
-    // const servicesReady =
-    //   await initializeServices();
+    const servicesReady =
+      await initializeServices();
 
-    // if (!servicesReady) {
-    //   throw new Error(
-    //     'Failed to initialize required services'
-    //   );
-    // }
+    if (!servicesReady) {
+      throw new Error(
+        'Failed to initialize required services'
+      );
+    }
 
     app.listen(port, () => {
       console.log(
