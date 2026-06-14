@@ -12,20 +12,20 @@ import appRoutes from './routes/appRoutes.js';
 import healthRoutes from './routes/healthRoutes.js';
 import logger from './notification/services/logger.js';
 
-// Global error handlers - log errors before process exits
-process.on('uncaughtException', (error) => {
-  console.error('[FATAL] Uncaught Exception:', error);
-  logger.error('Uncaught Exception', { error: error.message, stack: error.stack });
-  // Ensure logs are flushed before exit
-  setTimeout(() => process.exit(1), 500);
-});
+// // Global error handlers - log errors before process exits
+// process.on('uncaughtException', (error) => {
+//   console.error('[FATAL] Uncaught Exception:', error);
+//   logger.error('Uncaught Exception', { error: error.message, stack: error.stack });
+//   // Ensure logs are flushed before exit
+//   setTimeout(() => process.exit(1), 500);
+// });
 
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('[FATAL] Unhandled Rejection:', reason);
-  logger.error('Unhandled Rejection', { reason: String(reason), promise: String(promise) });
-  // Ensure logs are flushed before exit
-  setTimeout(() => process.exit(1), 500);
-});
+// process.on('unhandledRejection', (reason, promise) => {
+//   console.error('[FATAL] Unhandled Rejection:', reason);
+//   logger.error('Unhandled Rejection', { reason: String(reason), promise: String(promise) });
+//   // Ensure logs are flushed before exit
+//   setTimeout(() => process.exit(1), 500);
+// });
 
 // app config
 const app = express();
