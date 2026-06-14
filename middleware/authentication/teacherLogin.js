@@ -27,14 +27,14 @@ const loginTeacher = async (req, res) => {
     const token = createRoleToken({ role: 'teacher', userId: teacher._id.toString() });
     setAuthCookie(res, 'teacherToken', token);
     
-    await sendAuthNotificationEmail({
-      to: teacher.email,
-      role: 'teacher',
-      eventType: 'login',
-      actor: teacher.username,
-      timestamp: new Date().toISOString(),
-      ipAddress: req.ip
-    });
+    // await sendAuthNotificationEmail({
+    //   to: teacher.email,
+    //   role: 'teacher',
+    //   eventType: 'login',
+    //   actor: teacher.username,
+    //   timestamp: new Date().toISOString(),
+    //   ipAddress: req.ip
+    // });
 
     return res.json({
       success: true,

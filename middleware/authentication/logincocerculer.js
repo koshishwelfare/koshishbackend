@@ -31,14 +31,14 @@ const loginCociculer = async (req, res) => {
     const token = createRoleToken({ role: 'cocirculer', userId: cocircular._id.toString() });
     setAuthCookie(res, 'cocirculerToken', token);
     
-    await sendAuthNotificationEmail({
-      to: cocircular.email,
-      role: 'cocircular',
-      eventType: 'login',
-      actor: cocircular.email,
-      timestamp: new Date().toISOString(),
-      ipAddress: req.ip
-    });
+    // await sendAuthNotificationEmail({
+    //   to: cocircular.email,
+    //   role: 'cocircular',
+    //   eventType: 'login',
+    //   actor: cocircular.email,
+    //   timestamp: new Date().toISOString(),
+    //   ipAddress: req.ip
+    // });
 
     return res.json({
       success: true,

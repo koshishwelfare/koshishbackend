@@ -64,13 +64,13 @@ const onboardCocircular = async (req, res) => {
       isactive: true
     });
 
-    const mailResult = await sendCredentialTemplateEmail({
-      to: cocircular.email,
-      name: cocircular.name,
-      username: cocircular.email,
-      password,
-      label: 'Co-Curricular Onboarding Credentials'
-    });
+    // const mailResult = await sendCredentialTemplateEmail({
+    //   to: cocircular.email,
+    //   name: cocircular.name,
+    //   username: cocircular.email,
+    //   password,
+    //   label: 'Co-Curricular Onboarding Credentials'
+    // });
 
     return res.json({
       success: true,
@@ -85,12 +85,11 @@ const onboardCocircular = async (req, res) => {
         createdAt: cocircular.date
       },
       email: {
-        sent: mailResult.sent,
-        reason: mailResult.reason || null
+        sent: false ,// mailResult.sent,
+        reason:null // mailResult.reason || null
       },
-      credentials: mailResult.sent
-        ? undefined
-        : {
+      credentials:  // mailResult.sent ? undefined :
+       {
             username: cocircular.email,
             password
           }

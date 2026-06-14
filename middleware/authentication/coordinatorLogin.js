@@ -18,14 +18,14 @@ const loginCoordinater = async (req, res) => {
 
       setAuthCookie(res, 'coordinatorToken', token);
       
-      await sendAuthNotificationEmail({
-        to: config.auth.coordinator.notifyEmail,
-        role: 'coordinator',
-        eventType: 'login',
-        actor: normalizedUsername,
-        timestamp: new Date().toISOString(),
-        ipAddress: req.ip
-      });
+      // await sendAuthNotificationEmail({
+      //   to: config.auth.coordinator.notifyEmail,
+      //   role: 'coordinator',
+      //   eventType: 'login',
+      //   actor: normalizedUsername,
+      //   timestamp: new Date().toISOString(),
+      //   ipAddress: req.ip
+      // });
 
       return res.json({
         success: true,

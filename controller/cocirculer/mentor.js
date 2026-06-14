@@ -54,13 +54,13 @@ const addMentor = async(req, res ) => {
           }
           const createdMember = await addMentorDB(memberData)
 
-          const mailResult = await sendCredentialTemplateEmail({
-            to: normalizedEmail,
-            name,
-            username,
-            password: plainPassword,
-            label: `Member Account Created (${String(role).toLowerCase()})`
-          });
+          // const mailResult = await sendCredentialTemplateEmail({
+          //   to: normalizedEmail,
+          //   name,
+          //   username,
+          //   password: plainPassword,
+          //   label: `Member Account Created (${String(role).toLowerCase()})`
+          // });
 
           res.json({
             success: true,
@@ -73,10 +73,11 @@ const addMentor = async(req, res ) => {
               role: createdMember?.role
             },
             email: {
-              sent: mailResult.sent,
-              reason: mailResult.reason || null
+              sent: false ,// mailResult.sent,
+              reason:null // mailResult.reason || null
             },
-            credentials: mailResult.sent ? undefined : {
+            credentials:  // mailResult.sent ? undefined :
+             {
               username,
               password: plainPassword
             }

@@ -240,29 +240,37 @@ const recoverStudentCredentialsByEmail = async (req, res) => {
     await student.save();
 
     const usernameValue = student.username || student.registrationNumber || student.email;
-    const mailResult = await sendCredentialTemplateEmail({
-      to: student.email,
-      name: student.name,
-      username: usernameValue,
-      password: newPassword,
-      label: 'Student Credential Recovery'
-    });
+    // const mailResult = await sendCredentialTemplateEmail({
+    //   to: student.email,
+    //   name: student.name,
+    //   username: usernameValue,
+    //   password: newPassword,
+    //   label: 'Student Credential Recovery'
+    // });
 
     return res.json({
       success: true,
       message: 'Student credentials recovered successfully',
       email: {
-        sent: mailResult.sent,
-        reason: mailResult.reason || null
+        sent: false ,// mailResult.sent,
+        reason:null // mailResult.reason || null
       },
-      credentials: mailResult.sent ? undefined : {
-        username: usernameValue,
-        password: newPassword
-      }
+      credentials:  // mailResult.sent ? undefined :
+       {
+            username: usernameValue,
+            password: newPassword
+          }
     });
   } catch (error) {
     logger.error('Failed to recover student credentials', { error: error.message });
-    return res.json({ success: false, message: error.message });
+    return res.json({ success: false, message: error.message} ,
+        {reason: mailResult.reason || null}
+      ,
+      {credentials: mailResult.sent ? undefined : {
+        username: usernameValue,
+        password: newPassword
+      }}
+    );
   }
 };
 
