@@ -11,7 +11,7 @@ import userRoutes from './routes/userRoutes.js';
 import appRoutes from './routes/appRoutes.js';
 import healthRoutes from './routes/healthRoutes.js';
 import logger from './notification/services/logger.js';
-
+import {} from 'express-async-handler'
 // // Global error handlers - log errors before process exits
 // process.on('uncaughtException', (error) => {
 //   console.error('[FATAL] Uncaught Exception:', error);
@@ -98,13 +98,13 @@ const initializeServices = async () => {
 
 const port = 5000; // config.server.port
 console.log(`[INFO] Starting server on port ${port}...`);
-// const corsOrigin = normalizeCorsOrigin(config.cors.origin);
+const corsOrigin = normalizeCorsOrigin(config.cors.origin);
 
 //  middleware
-app.use(cors({
-    origin: corsOrigin,
-    credentials: Boolean(config.cors.credentials)
-}));
+// app.use(cors({
+//     origin: corsOrigin,
+//     credentials: Boolean(config.cors.credentials)
+// }));
 app.use(cookieParser());
 // Parse JSON bodies (API requests)
 app.use(express.json());
