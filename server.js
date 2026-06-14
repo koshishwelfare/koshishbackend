@@ -128,13 +128,13 @@ const startServer = async () => {
     logger.info('server is started', { port });
   });
 
-  void initializeServices().catch((error) => {
-    console.error('[FATAL] Failed during background service initialization:', error);
-    logger.error('Background service initialization failed', {
-      error: error.message,
-      stack: error.stack,
-    });
-  });
+  // void initializeServices().catch((error) => {
+  //   console.error('[FATAL] Failed during background service initialization:', error);
+  //   logger.error('Background service initialization failed', {
+  //     error: error.message,
+  //     stack: error.stack,
+  //   });
+  // });
 };
 
 // Handle errors from the async startServer function
@@ -142,13 +142,16 @@ startServer().catch((error) => {
   console.error('[FATAL] Failed to start server:', error);
   logger.error('Failed to start server', { error: error.message, stack: error.stack });
   // Keep the process alive only for unexpected startup failures outside service initialization.
-  // setTimeout(() => process.exit(1), 500);
+  setTimeout(() =>{
+     logger.error('Exiting process due to startup failure');
+     console.error('[FATAL] Exiting process due to startup failure');
+     process.exit(1)}, 5000000);
 });
 
 // Additional safeguard: catch any stderr output that might be missed
-if (process.stderr && typeof process.stderr.on === 'function') {
-  process.stderr.on('error', (error) => {
-    console.error('[STDERR ERROR]', error);
-    process.exit(1);
-  });
-}
+// if (process.stderr && typeof process.stderr.on === 'function') {
+//   process.stderr.on('error', (error) => {
+//     console.error('[STDERR ERROR]', error);
+//     process.exit(1);
+//   });
+// }
