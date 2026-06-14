@@ -57,8 +57,8 @@ const initializeServices = async () => {
   logger.info('Starting service initialization');
 
   const results = await Promise.allSettled([
-    // ConnectDB(),
-    // ConnectCloudinary(),
+    ConnectDB(),
+    ConnectCloudinary(),
   ]);
 
   const [databaseResult, cloudinaryResult] = results;
@@ -122,7 +122,7 @@ app.get('/' ,   (req,res)=>{
 
 // Start server only after services are initialized
 const startServer = async () => {
-  app.listen(port, () => {
+  app.listen(port ||5000, () => {
     console.log(`[SUCCESS] Server running on port ${port}`);
     logger.info('server is started', { port });
   });

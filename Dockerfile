@@ -1,8 +1,5 @@
-# Use a smaller, more secure base image
-FROM node:alpine3.18
-
-# Install nodemon globally
-RUN npm install -g nodemon
+# Use the Node version required by package.json.
+FROM node:22-alpine
 
 # Set working directory
 WORKDIR /usr/src/app
@@ -11,13 +8,12 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci --omit=dev
 
 # Copy rest of the application code
 COPY . .
 
-# Make port 8080 available
-EXPOSE 8080
+# Render injects PORT at runtime. EXPOSE is documentation only.
+EXPOSE 5000
 
-# Use a safer and more explicit CMD format
-CMD ["sh", "./start.sh"]
+CMD ["npm", "start"]

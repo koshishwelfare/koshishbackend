@@ -1,7 +1,8 @@
-# #!/bin/bash
+#!/bin/sh
+set -e
 
-# if [ "$NODE_ENV" == "production" ] ; then
-#   npm run start
-# else
-#   npm run dev
-# fi
+if [ "$NODE_ENV" = "production" ]; then
+  npm start
+else
+  npm run dev
+fi
