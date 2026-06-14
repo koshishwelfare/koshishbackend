@@ -9,6 +9,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
+    "build": "",
     "dev": "nodemon server.js",
     "db:sync-student-indexes": "node scripts/syncStudentIndexes.js",
     "email:worker": "node scripts/emailQueueWorker.js",

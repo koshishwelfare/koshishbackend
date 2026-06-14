@@ -38,8 +38,8 @@ const ConnectDB = async ()=>{
                 
                 await mongoose.connect(config.database.mongodbUri, {
                         dbName: config.database.dbName,
-                        useNewUrlParser: true,
-                        useUnifiedTopology: true,
+                        // useNewUrlParser: true,
+                        // useUnifiedTopology: true,
                 });
 
                 console.log('[DB] MongoDB connected successfully');

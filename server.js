@@ -57,8 +57,8 @@ const initializeServices = async () => {
   logger.info('Starting service initialization');
 
   const results = await Promise.allSettled([
-    ConnectDB(),
-    ConnectCloudinary(),
+    // ConnectDB(),
+    // ConnectCloudinary(),
   ]);
 
   const [databaseResult, cloudinaryResult] = results;
