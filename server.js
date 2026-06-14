@@ -123,7 +123,7 @@ app.get('/' ,   (req,res)=>{
 
 // Start server only after services are initialized
 const startServer = async () => {
-  app.listen(port, () => {
+  app.listen(port || 5005, () => {
     console.log(`[SUCCESS] Server running on port ${port}`);
     logger.info('server is started', { port });
   });
