@@ -3,14 +3,13 @@
   "version": "1.0.0",
   "main": "server.js",
   "type": "module",
-  "engines": {
-    "node": ">=22.0.0"
-  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "build": "",
     "dev": "nodemon server.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
     "db:sync-student-indexes": "node scripts/syncStudentIndexes.js",
     "email:worker": "node scripts/emailQueueWorker.js"
   },

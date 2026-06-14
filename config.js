@@ -18,8 +18,8 @@ const smtpFrom = String(process.env.SMTP_FROM || process.env.SMTP_USER || '').tr
 const config = {
   // Server Configuration
   server: {
-    port: parseInt(process.env.PORT) || 5000,
-    nodeEnv: process.env.NODE_ENV || 'development',
+    port: parseInt(process.env.PORT),
+    nodeEnv: process.env.NODE_ENV
   },
 
   // Database Configuration
@@ -30,7 +30,7 @@ const config = {
 
   // JWT Configuration
   jwt: {
-    secret: process.env.JWT_SECRET || process.env.JWT_SECKRET || 'default-secret-key',
+    secret: process.env.JWT_SECRET || process.env.JWT_SECKRET,
     expiresIn: process.env.JWT_EXPIRES_IN || '7d',
   },
 
@@ -72,8 +72,8 @@ const config = {
   // Co-curricular, Teacher, and Student are onboarded dynamically and credentials are stored in database
   auth: {
     coordinator: {
-      username: process.env.COORDINATOR_USERNAME || 'coordinator@example.com',
-      password: process.env.COORDINATOR_PASSWORD || process.env.COORDINATER_PASSWORD || 'coordinator123',
+      username: process.env.COORDINATOR_USERNAME,
+      password: process.env.COORDINATOR_PASSWORD ,
       notifyEmail: process.env.COORDINATOR_NOTIFY_EMAIL || '',
     },
   },
@@ -87,14 +87,14 @@ const config = {
 
   // CORS Configuration
   cors: {
-    origin: process.env.CORS_ORIGIN || true,
+    origin: process.env.CORS_ORIGIN,
     credentials: true,
   },
 
   // Frontend URLs
   frontend: {
-    studentUrl: process.env.STUDENT_FRONTEND_URL || 'http://localhost:5173',
-    adminUrl: process.env.ADMIN_FRONTEND_URL || 'http://localhost:5174',
+    studentUrl: process.env.STUDENT_FRONTEND_URL,
+    adminUrl: process.env.ADMIN_FRONTEND_URL,
   },
 };
 
