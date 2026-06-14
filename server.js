@@ -87,12 +87,13 @@ const initializeServices = async () => {
     console.log('[INFO] All services initialized successfully');
     return true;
   }
-
+ else {
   logger.warn('Service initialization completed with failures', {
     failedServices,
   });
   console.warn('[WARN] Service initialization completed with failures:', failedServices.join(', '));
   return false;
+}
 };
 
 const port = config.server.port
@@ -141,7 +142,7 @@ startServer().catch((error) => {
   console.error('[FATAL] Failed to start server:', error);
   logger.error('Failed to start server', { error: error.message, stack: error.stack });
   // Keep the process alive only for unexpected startup failures outside service initialization.
-  setTimeout(() => process.exit(1), 500);
+  // setTimeout(() => process.exit(1), 500);
 });
 
 // Additional safeguard: catch any stderr output that might be missed
