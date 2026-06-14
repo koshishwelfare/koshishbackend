@@ -96,8 +96,9 @@ const initializeServices = async () => {
 }
 };
 
-const port = config.server.port
-const corsOrigin = normalizeCorsOrigin(config.cors.origin);
+const port = 5000; // config.server.port
+console.log(`[INFO] Starting server on port ${port}...`);
+// const corsOrigin = normalizeCorsOrigin(config.cors.origin);
 
 //  middleware
 app.use(cors({
@@ -123,7 +124,7 @@ app.get('/' ,   (req,res)=>{
 
 // Start server only after services are initialized
 const startServer = async () => {
-  app.listen(port || 5005, () => {
+  app.listen(port, () => {
     console.log(`[SUCCESS] Server running on port ${port}`);
     logger.info('server is started', { port });
   });
