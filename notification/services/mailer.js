@@ -2,8 +2,7 @@ import nodemailer from 'nodemailer';
 import config from '../../config.js';
 import logger from './logger.js';
 import { validateEmailParams, sanitizeEmail } from './emailValidator.js';
-import { enqueueEmailJob, getEmailQueueHealth, isQueueEnabled, isSqsEnabled } from './sqsQueue.js';
-import { enqueueToUptrash, isUptrashEnabled, getUptrashHealth } from './uptrashQueue.js';
+import { enqueueEmailJob, getEmailQueueHealth, isEmailQueueConfigured } from './emailQueue.js';
 import { authEventTemplate, credentialsTemplate, holidayEventTemplate } from '../templates/emailTemplates.js';
 
 const safe = (value) => String(value || '').trim();
@@ -172,89 +171,65 @@ const sendMailWithRetry = async (
   };
 };
 
-const queueOrSendMail = async ({ to, subject, text, html }, queueMeta = {}) => {
+const queueMail = async ({ to, subject, text, html }, queueMeta = {}) => {
   const payload = { to, subject, text, html };
 
-  // TRY UPTRASH FIRST (PRIMARY QUEUE)
-  if (isUptrashEnabled()) {
-    try {
-      const queueResult = await enqueueToUptrash({
-        type: queueMeta.type || 'email',
-        payload,
-        meta: queueMeta,
-      });
-
-      logger.info('Email queued for Uptrash delivery', {
-        to,
-        subject,
-        messageId: queueResult.messageId,
-        queueName: queueResult.queueName,
-        type: queueMeta.type || 'email',
-      });
-
-      return {
-        sent: true,
-        queued: true,
-        queueProvider: 'uptrash',
-        messageId: queueResult.messageId,
-        attempts: 0,
-      };
-    } catch (error) {
-      logger.warn('Email queue enqueue failed on Uptrash, trying SQS fallback', {
-        to,
-        subject,
-        error: error.message,
-        code: error.code,
-        type: queueMeta.type || 'email',
-      });
-    }
+  const validation = validateEmailParams(payload);
+  if (!validation.valid) {
+    const errorMsg = validation.errors.join('; ');
+    logger.error('Email validation failed before queueing', { to, subject, errors: validation.errors });
+    return { sent: false, queued: false, error: errorMsg, attempts: 0 };
   }
 
-  // TRY SQS SECOND (SECONDARY QUEUE)
-  if (isSqsEnabled()) {
-    try {
-      const queueResult = await enqueueEmailJob({
-        type: queueMeta.type || 'email',
-        payload,
-        meta: queueMeta,
-      });
-
-      logger.info('Email queued for SQS delivery', {
-        to,
-        subject,
-        queueUrl: queueResult.queueUrl,
-        messageId: queueResult.messageId,
-        type: queueMeta.type || 'email',
-      });
-
-      return {
-        sent: true,
-        queued: true,
-        queueProvider: 'sqs',
-        messageId: queueResult.messageId,
-        queueUrl: queueResult.queueUrl,
-        attempts: 0,
-      };
-    } catch (error) {
-      logger.warn('Email queue enqueue failed on SQS, falling back to SMTP', {
-        to,
-        subject,
-        error: error.message,
-        code: error.code,
-        type: queueMeta.type || 'email',
-      });
-    }
+  if (!isEmailQueueConfigured()) {
+    logger.error('Redis email queue is not configured', { to, subject, type: queueMeta.type || 'email' });
+    return { sent: false, queued: false, error: 'Redis is not configured for email queue', attempts: 0 };
   }
 
-  // FALLBACK TO DIRECT SMTP SEND (TERTIARY/FINAL)
-  return await sendMailWithRetry(payload);
+  try {
+    const queueResult = await enqueueEmailJob({
+      type: queueMeta.type || 'email',
+      payload,
+      meta: queueMeta,
+    });
+
+    if (!queueResult.queued) {
+      return { sent: false, queued: false, error: queueResult.error, attempts: 0 };
+    }
+
+    logger.info('Email queued for BullMQ delivery', {
+      to,
+      subject,
+      jobId: queueResult.jobId,
+      queueName: queueResult.queueName,
+      type: queueMeta.type || 'email',
+    });
+
+    return {
+      sent: true,
+      queued: true,
+      queueProvider: 'bullmq',
+      queueName: queueResult.queueName,
+      jobId: queueResult.jobId,
+      attempts: 0,
+    };
+  } catch (error) {
+    logger.error('Email queue enqueue failed', {
+      to,
+      subject,
+      error: error.message,
+      type: queueMeta.type || 'email',
+    });
+
+    return { sent: false, queued: false, error: error.message, attempts: 0 };
+  }
 };
 
 /**
  * Send raw email
  */
 const sendCredentialsEmail = async ({ to, subject, text }) => {
-  return await queueOrSendMail({ to, subject, text }, { type: 'raw' });
+  return await queueMail({ to, subject, text }, { type: 'raw' });
 };
 
 /**
@@ -263,7 +238,7 @@ const sendCredentialsEmail = async ({ to, subject, text }) => {
 const sendCredentialTemplateEmail = async ({ to, name, username, password, label }) => {
   try {
     const payload = credentialsTemplate({ name, username, password, label });
-    return await queueOrSendMail({ to, ...payload }, {
+    return await queueMail({ to, ...payload }, {
       type: 'credential-template',
       name,
       username,
@@ -290,7 +265,7 @@ const sendAuthNotificationEmail = async ({ to, role, eventType, actor, timestamp
 
   try {
     const payload = authEventTemplate({ role, eventType, actor, timestamp, ipAddress });
-    return await queueOrSendMail({ to, ...payload }, {
+    return await queueMail({ to, ...payload }, {
       type: 'auth-notification',
       role,
       eventType,
@@ -325,7 +300,7 @@ const sendHolidayNotificationEmail = async ({ to, recipientName, sessionName, ho
       description,
       action,
     });
-    return await queueOrSendMail({ to, ...payload }, {
+    return await queueMail({ to, ...payload }, {
       type: 'holiday-notification',
       recipientName,
       sessionName,
@@ -365,26 +340,14 @@ const checkEmailHealth = async () => {
     }
   }
 
-  // Get queue health for both Uptrash and SQS
-  const [uptrashHealth, sqsHealth] = await Promise.all([
-    getUptrashHealth().catch(err => ({ enabled: false, error: err.message })),
-    getEmailQueueHealth().catch(err => ({ enabled: false, error: err.message })),
-  ]);
-
-  const queues = {};
-  if (uptrashHealth.enabled !== false) {
-    queues.uptrash = uptrashHealth;
-  }
-  if (sqsHealth.enabled !== false) {
-    queues.sqs = sqsHealth;
-  }
+  const queueHealth = await getEmailQueueHealth();
 
   return {
     configured: config_valid,
     connected: connection_ok,
     error: error || null,
-    queues: queues || {},
+    queue: queueHealth,
   };
 };
 
-export { sendCredentialsEmail, sendCredentialTemplateEmail, sendAuthNotificationEmail, sendHolidayNotificationEmail, checkEmailHealth, sendMailWithRetry };
+export { sendCredentialsEmail, sendCredentialTemplateEmail, sendAuthNotificationEmail, sendHolidayNotificationEmail, checkEmailHealth, sendMailWithRetry, queueMail };

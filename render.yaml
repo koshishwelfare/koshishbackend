@@ -1,0 +1,99 @@
+services:
+  - type: keyvalue
+    name: koshish-redis
+    plan: free
+    ipAllowList: []
+
+  - type: web
+    name: koshish-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DB_NAME
+        value: koshish
+      - key: JWT_SECRET
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: koshish-redis
+          property: connectionString
+      - key: EMAIL_QUEUE_NAME
+        value: email-notifications
+      - key: EMAIL_QUEUE_ATTEMPTS
+        value: 3
+      - key: EMAIL_QUEUE_BACKOFF_DELAY_MS
+        value: 5000
+      - key: CORS_ORIGIN
+        sync: false
+      - key: STUDENT_FRONTEND_URL
+        sync: false
+      - key: ADMIN_FRONTEND_URL
+        sync: false
+
+  - type: worker
+    name: koshish-email-worker
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: npm run email:worker
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DB_NAME
+        value: koshish
+      - key: JWT_SECRET
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: koshish-redis
+          property: connectionString
+      - key: EMAIL_QUEUE_NAME
+        value: email-notifications
+      - key: EMAIL_QUEUE_CONCURRENCY
+        value: 5
+      - key: EMAIL_QUEUE_ATTEMPTS
+        value: 3
+      - key: EMAIL_QUEUE_BACKOFF_DELAY_MS
+        value: 5000

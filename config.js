@@ -24,7 +24,7 @@ const config = {
 
   // Database Configuration
   database: {
-    mongodbUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/koshish',
+    mongodbUri: process.env.MONGODB_URI ,
     dbName: process.env.MONGODB_DB_NAME || 'koshish',
   },
 
@@ -51,34 +51,18 @@ const config = {
       from: smtpFrom,
     },
     queue: {
-      // Uptrash Configuration (PRIMARY QUEUE)
-      uptrash: {
-        enabled: String(process.env.EMAIL_QUEUE_UPTRASH_ENABLED || '').trim().toLowerCase() === 'true',
-        apiKey: String(process.env.UPTRASH_API_KEY || '').trim(),
-        baseUrl: String(process.env.UPTRASH_BASE_URL || 'https://api.uptrash.io').trim(),
-        queueName: String(process.env.UPTRASH_QUEUE_NAME || 'email-queue').trim(),
-        pollIntervalMs: parseInt(process.env.UPTRASH_POLL_INTERVAL_MS, 10) || 5000,
-      },
-      // SQS Configuration (SECONDARY/FALLBACK QUEUE)
-      sqs: {
-        enabled: String(process.env.EMAIL_QUEUE_SQS_ENABLED || '').trim().toLowerCase() === 'true',
-        region: String(process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || '').trim(),
-        queueUrl: String(process.env.EMAIL_QUEUE_URL || '').trim(),
-        queueName: String(process.env.EMAIL_QUEUE_NAME || '').trim(),
-        endpoint: String(process.env.AWS_SQS_ENDPOINT || '').trim(),
-        accessKeyId: String(process.env.AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY || '').trim(),
-        secretAccessKey: String(process.env.AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_KEY || '').trim(),
-        sessionToken: String(process.env.AWS_SESSION_TOKEN || '').trim(),
-        waitTimeSeconds: parseInt(process.env.EMAIL_QUEUE_WAIT_TIME_SECONDS, 10) || 20,
-        visibilityTimeout: parseInt(process.env.EMAIL_QUEUE_VISIBILITY_TIMEOUT, 10) || 60,
-        maxMessages: parseInt(process.env.EMAIL_QUEUE_MAX_MESSAGES, 10) || 10,
-        pollDelayMs: parseInt(process.env.EMAIL_QUEUE_POLL_DELAY_MS, 10) || 5000,
-      },
-      // Legacy support - check if any queue is enabled
-      enabled: String(process.env.EMAIL_QUEUE_ENABLED || '').trim().toLowerCase() === 'true' ||
-               String(process.env.EMAIL_QUEUE_UPTRASH_ENABLED || '').trim().toLowerCase() === 'true' ||
-               String(process.env.EMAIL_QUEUE_SQS_ENABLED || '').trim().toLowerCase() === 'true',
-      provider: String(process.env.EMAIL_QUEUE_PROVIDER || 'none').trim().toLowerCase(),
+      provider: 'bullmq',
+      queueName: String(process.env.EMAIL_QUEUE_NAME || 'email-notifications').trim(),
+      redisUrl: String(process.env.REDIS_URL || '').trim(),
+      redisHost: String(process.env.REDIS_HOST || '').trim(),
+      redisPort: parseInt(process.env.REDIS_PORT, 10) || 6379,
+      redisUsername: String(process.env.REDIS_USERNAME || '').trim(),
+      redisPassword: String(process.env.REDIS_PASSWORD || '').trim(),
+      redisTls: String(process.env.REDIS_TLS || '').trim().toLowerCase() === 'true',
+      attempts: parseInt(process.env.EMAIL_QUEUE_ATTEMPTS, 10) || 3,
+      backoffDelayMs: parseInt(process.env.EMAIL_QUEUE_BACKOFF_DELAY_MS, 10) || 5000,
+      removeOnComplete: parseInt(process.env.EMAIL_QUEUE_REMOVE_ON_COMPLETE, 10) || 1000,
+      removeOnFail: parseInt(process.env.EMAIL_QUEUE_REMOVE_ON_FAIL, 10) || 5000,
     },
     isConfigured: Boolean(smtpHost && smtpPort && smtpUser && smtpPass),
   },
@@ -121,6 +105,9 @@ if (config.server.nodeEnv === 'production') {
     'jwt.secret',
     'cloudinary.apiKey',
     'cloudinary.apiSecret',
+    'email.smtp.user',
+    'email.smtp.pass',
+    'email.queue.redisUrl',
   ];
 
   const missing = requiredKeys.filter((key) => {

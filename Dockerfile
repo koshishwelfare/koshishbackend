@@ -1,5 +1,5 @@
 # Use the Node version required by package.json.
-FROM node:22-alpine
+FROM node:22-bookworm-slim
 
 # Set working directory
 WORKDIR /usr/src/app

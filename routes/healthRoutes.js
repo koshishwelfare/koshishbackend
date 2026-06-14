@@ -11,9 +11,12 @@ const router = express.Router();
  *   configured: boolean, 
  *   connected: boolean, 
  *   error?: string, 
- *   queues?: { 
- *     uptrash?: { enabled, accessible, messageCount, error? },
- *     sqs?: { enabled, accessible, messageCount, error? }
+ *   queue?: {
+ *     provider: 'bullmq',
+ *     connected: boolean,
+ *     queueName: string,
+ *     counts?: object,
+ *     error?: string
  *   }
  * }
  * Status: 200 if connected, 503 if not

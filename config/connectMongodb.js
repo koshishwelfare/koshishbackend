@@ -34,7 +34,7 @@ const ConnectDB = async ()=>{
 
                 // Connect to MongoDB
                 console.log('[DB] Attempting to connect to MongoDB...');
-                logger.info('Connecting to MongoDB', { uri: config.database.mongodbUri });
+                logger.info('Connecting to MongoDB', { dbName: config.database.dbName });
                 
                 await mongoose.connect(config.database.mongodbUri, {
                         dbName: config.database.dbName,
@@ -60,7 +60,7 @@ const ConnectDB = async ()=>{
                 logger.error('Database connection failed', { 
                         error: error.message, 
                         stack: error.stack,
-                        mongoUri: config.database.mongodbUri 
+                        dbName: config.database.dbName
                 });
                 throw error; // Re-throw to be caught by server.js
         }

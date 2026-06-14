@@ -12,14 +12,14 @@
     "build": "",
     "dev": "nodemon server.js",
     "db:sync-student-indexes": "node scripts/syncStudentIndexes.js",
-    "email:worker": "node scripts/emailQueueWorker.js",
-    "uptrash:worker": "node scripts/uptrashQueueWorker.js"
+    "email:worker": "node scripts/emailQueueWorker.js"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "bullmq": "^5.78.1",
     "cloudinary": "^2.5.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
